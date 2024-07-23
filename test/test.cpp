@@ -1,5 +1,6 @@
 #include "iostream"
 
+#include "../src/canvas.hpp"
 #include "../src/vector.hpp"
 
 void test_vector() {
@@ -58,7 +59,34 @@ void test_vector() {
     }
 }
 
+void test_canvas() {
+    canvas canv{10, 20};
+    for (color &c : canv.pixels) {
+        if (c.r == 0 && c.g == 0 && c.b == 0) {
+            continue;
+        } else {
+            std::cout << "canvas NOT OK" << std::endl;
+        }
+    }
+
+    canv.write(5, 5, color{0.5, 0.3, 0.4});
+    color c = canv.get(5, 5);
+    if (!eq(c.r, 0.5) || !eq(c.g, 0.3) || !eq(c.b, 0.4)) {
+        std::cout << "canvas NOT OK" << std::endl;
+        return;
+    }
+
+    canv.to_ppm();
+
+    std::cout << "canvas OK" << std::endl;
+}
+
 int main(void) {
+    std::cout << std::endl
+              << "testing vectors..." << std::endl;
     test_vector();
+    std::cout << std::endl
+              << "testing canvas..." << std::endl;
+    test_canvas();
     return 0;
 }

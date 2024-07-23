@@ -1,3 +1,6 @@
+#ifndef VECTOR_HPP
+#define VECTOR_HPP
+
 #include "math.h"
 
 const float EPSILON = 0.0001f;
@@ -21,7 +24,7 @@ struct vec {
     vec operator-();
     vec operator*(const float &c);
     float mag();
-    vec normalize();
+    void normalize();
     float dot(const vec &a);
     vec cross(const vec &a);
 };
@@ -71,13 +74,11 @@ float vec::mag() {
     return sqrt(pow(this->x, 2) + pow(this->y, 2) + pow(this->z, 2));
 };
 
-vec vec::normalize() {
+void vec::normalize() {
     float mag = this->mag();
-    return vec{
-        this->x / mag,
-        this->y / mag,
-        this->z / mag,
-        0};
+    this->x /= mag;
+    this->y /= mag;
+    this->z /= mag;
 };
 
 float vec::dot(const vec &a) {
@@ -92,3 +93,5 @@ vec vec::cross(const vec &a) {
         0,
     };
 };
+
+#endif

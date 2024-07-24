@@ -24,7 +24,7 @@ struct vec {
     vec operator-();
     vec operator*(const float &c);
     float mag();
-    void normalize();
+    vec normalize();
     float dot(const vec &a);
     vec cross(const vec &a);
 };
@@ -74,11 +74,12 @@ float vec::mag() {
     return sqrt(pow(this->x, 2) + pow(this->y, 2) + pow(this->z, 2));
 };
 
-void vec::normalize() {
+vec vec::normalize() {
     float mag = this->mag();
     this->x /= mag;
     this->y /= mag;
     this->z /= mag;
+    return *this;
 };
 
 float vec::dot(const vec &a) {

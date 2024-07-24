@@ -21,11 +21,11 @@ canvas::canvas(const int width, const int height) : width(width), height(height)
 }
 
 void canvas::write(const int x, const int y, const color &c) {
-    this->pixels[x * this->height + y] = c;
+    this->pixels[y * this->width + x] = c;
 }
 
 color canvas::get(const int x, const int y) {
-    return this->pixels[x * this->height + y];
+    return this->pixels[y * this->width + x];
 }
 
 void clamp(int &value) {
@@ -43,38 +43,41 @@ void canvas::to_ppm() {
     out << std::to_string(this->width) << " " << std::to_string(this->height) << std::endl;
     out << "255" << std::endl;
     int count = out.tellp();
-    for (color &c : this->pixels) {
-        int red = c.r * 255;
-        clamp(red);
-        out << std::to_string(red);
-        int total_count = out.tellp();
-        if (total_count - count > 68) {
-            out << std::endl;
-            count = total_count;
-        } else {
-            out << " ";
-        }
+    for (int y = 0; y < this->height; y++) {
+        for (int x = 0; x < this->width; x++) {
+            color c = get(x, y);
+            int red = c.r * 255;
+            clamp(red);
+            out << std::to_string(red);
+            int total_count = out.tellp();
+            if (total_count - count > 67) {
+                out << std::endl;
+                count = total_count;
+            } else {
+                out << " ";
+            }
 
-        int green = c.g * 255;
-        clamp(green);
-        out << std::to_string(green);
-        total_count = out.tellp();
-        if (total_count - count > 68) {
-            out << std::endl;
-            count = total_count;
-        } else {
-            out << " ";
-        }
+            int green = c.g * 255;
+            clamp(green);
+            out << std::to_string(green);
+            total_count = out.tellp();
+            if (total_count - count > 67) {
+                out << std::endl;
+                count = total_count;
+            } else {
+                out << " ";
+            }
 
-        int blue = c.b * 255;
-        clamp(blue);
-        out << std::to_string(blue);
-        total_count = out.tellp();
-        if (total_count - count > 68) {
-            out << std::endl;
-            count = total_count;
-        } else {
-            out << " ";
+            int blue = c.b * 255;
+            clamp(blue);
+            out << std::to_string(blue);
+            total_count = out.tellp();
+            if (total_count - count > 67) {
+                out << std::endl;
+                count = total_count;
+            } else {
+                out << " ";
+            }
         }
     }
     out << std::endl;

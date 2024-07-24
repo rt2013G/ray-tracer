@@ -35,7 +35,7 @@ bool vec::operator==(const vec &a) {
     } else {
         return false;
     }
-}
+};
 
 vec vec::operator+(const vec &a) {
     return vec{

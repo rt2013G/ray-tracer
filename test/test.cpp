@@ -1,6 +1,7 @@
 #include "iostream"
 
 #include "../src/canvas.hpp"
+#include "../src/matrix.hpp"
 #include "../src/vector.hpp"
 
 void test_vector() {
@@ -81,6 +82,33 @@ void test_canvas() {
     std::cout << "canvas OK" << std::endl;
 }
 
+void test_matrices() {
+    matrix4x4 A{{1, 2, 3, 4, 5, 6, 7, 8, 9, 8, 7, 6, 5, 4, 3, 2}};
+    matrix4x4 B{{-2, 1, 2, 3, 3, 2, 1, -1, 4, 3, 6, 5, 1, 2, 7, 8}};
+    matrix4x4 C{{20, 22, 50, 48, 44, 54, 114, 108, 40, 58, 110, 102, 16, 26, 46, 42}};
+
+    matrix4x4 res = A * B;
+    if (res == C) {
+        std::cout << "matrix mul OK" << std::endl;
+    } else {
+        std::cout << "matrix mul NOT OK" << std::endl;
+    }
+
+    matrix4x4 D{{1, 2, 3, 4, 2, 4, 4, 2, 8, 6, 4, 1, 0, 0, 0, 1}};
+    vec b = {1, 2, 3, 1};
+    vec Db = D * b;
+    vec expected = {18, 24, 33, 1};
+    if (Db == expected) {
+        std::cout << "matrix * vec OK" << std::endl;
+    } else {
+        std::cout << "matrix * vec NOT OK" << std::endl;
+    }
+    std::cout << Db.x << std::endl;
+    std::cout << Db.y << std::endl;
+    std::cout << Db.z << std::endl;
+    std::cout << Db.w << std::endl;
+}
+
 int main(void) {
     std::cout << std::endl
               << "testing vectors..." << std::endl;
@@ -88,5 +116,8 @@ int main(void) {
     std::cout << std::endl
               << "testing canvas..." << std::endl;
     test_canvas();
+    std::cout << std::endl
+              << "testing matrices..." << std::endl;
+    test_matrices();
     return 0;
 }

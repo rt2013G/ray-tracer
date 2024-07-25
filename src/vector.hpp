@@ -27,6 +27,7 @@ struct vec {
     vec normalize();
     float dot(const vec &a);
     vec cross(const vec &a);
+    void print();
 };
 
 bool vec::operator==(const vec &a) {
@@ -94,5 +95,9 @@ vec vec::cross(const vec &a) {
         0,
     };
 };
+
+void vec::print() {
+    std::cout << this->x << " " << this->y << " " << this->z << " " << this->w << std::endl;
+}
 
 #endif

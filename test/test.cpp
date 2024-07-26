@@ -178,6 +178,73 @@ void test_matrices() {
     }
 }
 
+void test_transforms() {
+    vec v{-3, 4, 5, 0};
+    vec p{-3, 4, 5, 1};
+    matrix4x4 transform = mat::translation(5, -3, 2);
+    if ((v == transform * v) && (transform * p == vec{2, 1, 7, 1})) {
+        std::cout << "mat translation OK" << std::endl;
+    } else {
+        std::cout << "mat translation ERROR" << std::endl;
+    }
+
+    matrix4x4 scal = mat::scaling(2, 3, 4);
+    vec p2{-4, 6, 8, 1};
+    if (scal * p2 == vec{-8, 18, 32, 1}) {
+        std::cout << "mat scaling OK" << std::endl;
+    } else {
+        std::cout << "mat scaling ERROR" << std::endl;
+    }
+
+    matrix4x4 reflection = mat::scaling(-1, 1, 1);
+    if (reflection * p2 == vec{4, 6, 8, 1}) {
+        std::cout << "mat reflection OK" << std::endl;
+    } else {
+        std::cout << "mat reflection ERROR" << std::endl;
+    }
+
+    vec px{0, 1, 0, 1};
+    vec py{0, 0, 1, 1};
+    vec pz{0, 1, 0, 1};
+    matrix4x4 rot_x = mat::rotation_x(M_PI / 4);
+    matrix4x4 rot_y = mat::rotation_y(M_PI / 4);
+    matrix4x4 rot_z = mat::rotation_z(M_PI / 4);
+    float sqrt2 = sqrt(2);
+    if (rot_x * px == vec{0, sqrt2 / 2, sqrt2 / 2, 1} &&
+        rot_y * py == vec{sqrt2 / 2, 0, sqrt2 / 2, 1} &&
+        rot_z * pz == vec{-sqrt2 / 2, sqrt2 / 2, 0, 1}) {
+        std::cout << "mat rotation x OK" << std::endl;
+    } else {
+        std::cout << "mat rotation x ERROR" << std::endl;
+    }
+
+    matrix4x4 shxy = mat::shearing(1, 0, 0, 0, 0, 0);
+    matrix4x4 shzx = mat::shearing(0, 0, 0, 0, 1, 0);
+    vec ps{2, 3, 4, 1};
+    if (shxy * ps == vec{5, 3, 4, 1} && shzx * ps == vec{2, 3, 6, 1}) {
+        std::cout << "mat shearing OK" << std::endl;
+    } else {
+        std::cout << "mat shearing ERROR" << std::endl;
+    }
+
+    vec point{1, 0, 1, 1};
+    matrix4x4 A = mat::rotation_x(M_PI / 2);
+    vec point_r = A * point;
+    matrix4x4 B = mat::scaling(5, 5, 5);
+    vec point_rs = B * point_r;
+    matrix4x4 C = mat::translation(10, 5, 7);
+    vec point_rst = C * point_rs;
+
+    matrix4x4 T = C * B * A;
+    vec point_t = T * point;
+    vec expected_point = vec{15, 0, 7, 1};
+    if (point_rst == expected_point && point_t == expected_point) {
+        std::cout << "mat chained transforms OK" << std::endl;
+    } else {
+        std::cout << "mat chained transforms ERROR" << std::endl;
+    }
+}
+
 int main(void) {
     std::cout << std::endl
               << "testing vectors..." << std::endl;
@@ -188,5 +255,8 @@ int main(void) {
     std::cout << std::endl
               << "testing matrices..." << std::endl;
     test_matrices();
+    std::cout << std::endl
+              << "testing transforms..." << std::endl;
+    test_transforms();
     return 0;
 }

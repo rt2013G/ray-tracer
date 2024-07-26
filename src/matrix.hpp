@@ -214,4 +214,31 @@ void matrix4x4::print() {
     }
 }
 
+namespace mat {
+matrix4x4 translation(float x, float y, float z) {
+    return matrix4x4{{1, 0, 0, x, 0, 1, 0, y, 0, 0, 1, z, 0, 0, 0, 1}};
+}
+
+matrix4x4 scaling(float x, float y, float z) {
+    return matrix4x4{{x, 0, 0, 0, 0, y, 0, 0, 0, 0, z, 0, 0, 0, 0, 1}};
+}
+
+matrix4x4 rotation_x(float radians) {
+    return matrix4x4{{1, 0, 0, 0, 0, cos(radians), -sin(radians), 0, 0, sin(radians), cos(radians), 0, 0, 0, 0, 1}};
+}
+
+matrix4x4 rotation_y(float radians) {
+    return matrix4x4{{cos(radians), 0, sin(radians), 0, 0, 1, 0, 0, -sin(radians), 0, cos(radians), 0, 0, 0, 0, 1}};
+}
+
+matrix4x4 rotation_z(float radians) {
+    return matrix4x4{{cos(radians), -sin(radians), 0, 0, sin(radians), cos(radians), 0, 0, 0, 0, 1, 0, 0, 0, 0, 1}};
+}
+
+matrix4x4 shearing(float xy, float xz, float yx, float yz, float zx, float zy) {
+    return matrix4x4({1, xy, xz, 0, yx, 1, yz, 0, zx, zy, 1, 0, 0, 0, 0, 1});
+}
+
+} // namespace mat
+
 #endif

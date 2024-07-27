@@ -2,38 +2,40 @@
 
 #include "canvas.hpp"
 #include "color.hpp"
+#include "primitives.hpp"
 #include "vector.hpp"
 
 int main(void) {
-    const int WIDTH = 1000;
-    const int HEIGHT = 500;
+    const int WIDTH = 100;
+    const int HEIGHT = 100;
     canvas canv{WIDTH, HEIGHT};
-    vec pos{0, 1, 0, 1};
-    vec velocity{1, 1.8, 0, 0};
-    velocity.normalize();
-    velocity = velocity * 11.25;
-    vec gravity{0, -0.1, 0, 0};
-    vec wind{-0.01, 0, 0, 0};
 
-    int i = 0;
-    while (pos.y >= 0) {
-        i++;
-        pos = pos + velocity;
-        velocity = velocity + gravity + wind;
+    sphere s{0};
+    matrix4x4 shear = mat::shearing(1, 0, 0, 0, 0, 0);
+    matrix4x4 scaling = mat::scaling(0.5, 1, 1);
+    s.transform = shear * scaling;
+    vec r_origin = vect::point3(0, 0, -5);
+    float wall_z = 10;
+    float wall_size = 7;
+    float pixel_size = wall_size / WIDTH;
+    float half = wall_size / 2;
 
-        int canv_y = HEIGHT - pos.y;
-        if (pos.x < 0 || pos.x >= WIDTH || canv_y < 0 || canv_y >= HEIGHT) {
-            continue;
-        } else {
-            canv.write(int(pos.x), canv_y, color{255, 255, 255});
+    for (int y = 0; y < HEIGHT; y++) {
+        float world_y = half - pixel_size * y;
+        for (int x = 0; x < WIDTH; x++) {
+            float world_x = -half + pixel_size * x;
+            vec position = vect::point3(world_x, world_y, wall_z);
+            ray r{r_origin, (position - r_origin).normalize()};
+            std::vector<intersection> inters = s.interesect(r);
+            for (intersection &i : inters) {
+                if (i.t > 0) {
+                    canv.write(x, y, color{1, 0, 0});
+                }
+            }
         }
     }
 
     canv.to_ppm();
-
-    std::cout << "X: " << pos.x << std::endl
-              << "Y: " << pos.y << std::endl;
-    std::cout << "TICK COUNT: " << i << std::endl;
 
     return 0;
 }

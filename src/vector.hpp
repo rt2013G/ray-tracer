@@ -100,4 +100,14 @@ void vec::print() {
     std::cout << this->x << " " << this->y << " " << this->z << " " << this->w << std::endl;
 }
 
+namespace vect {
+vec point3(float x, float y, float z) {
+    return vec{x, y, z, 1};
+}
+
+vec vector3(float x, float y, float z) {
+    return vec{x, y, z, 0};
+}
+} // namespace vect
+
 #endif

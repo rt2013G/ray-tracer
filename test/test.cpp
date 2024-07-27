@@ -2,6 +2,7 @@
 
 #include "../src/canvas.hpp"
 #include "../src/matrix.hpp"
+#include "../src/primitives.hpp"
 #include "../src/vector.hpp"
 
 void test_vector() {
@@ -245,6 +246,108 @@ void test_transforms() {
     }
 }
 
+void test_rays() {
+    ray r{vect::point3(2, 3, 4),
+          vect::vector3(1, 0, 0)};
+
+    vec p2 = r.position(2.5);
+    if (p2 == vect::point3(4.5, 3, 4)) {
+        std::cout << "rays position OK" << std::endl;
+    } else {
+        std::cout << "rays position ERROR";
+    }
+
+    sphere s{0};
+    ray r2{vect::point3(0, 0, -5), vect::vector3(0, 0, 1)};
+    std::vector<intersection> inters = s.interesect(r2);
+    if (inters.size() == 2 && eq(inters[0].t, 4.0) && eq(inters[1].t, 6.0)) {
+        std::cout << "ray sphere intersection 1 OK" << std::endl;
+    } else {
+        std::cout << "ray sphere intersection 1 ERROR" << std::endl;
+    }
+
+    ray r3{vect::point3(0, 1, -5), vect::vector3(0, 0, 1)};
+    std::vector<intersection> inters2 = s.interesect(r3);
+    if (inters2.size() == 2 && eq(inters2[0].t, 5.0) && eq(inters2[1].t, 5.0)) {
+        std::cout << "ray sphere intersection 2 OK" << std::endl;
+    } else {
+        std::cout << "ray sphere intersection 2 ERROR" << std::endl;
+    }
+
+    ray r4{vect::point3(0, 2, -5), vect::vector3(0, 0, 1)};
+    std::vector<intersection> inters3 = s.interesect(r4);
+    if (inters3.size() == 0) {
+        std::cout << "ray sphere intersection 3 OK" << std::endl;
+    } else {
+        std::cout << "ray sphere intersection 3 ERROR" << std::endl;
+    }
+
+    ray r5{vect::point3(0, 0, 0), vect::vector3(0, 0, 1)};
+    std::vector<intersection> inters4 = s.interesect(r5);
+    if (inters4.size() == 2 && eq(inters4[0].t, -1) && eq(inters4[1].t, 1)) {
+        std::cout << "ray sphere intersection 4 OK" << std::endl;
+    } else {
+        std::cout << "ray sphere intersection 4 ERROR" << std::endl;
+    }
+
+    ray r6{vect::point3(0, 0, 5), vect::vector3(0, 0, 1)};
+    std::vector<intersection> inters5 = s.interesect(r6);
+    if (inters5.size() == 2 && eq(inters5[0].t, -6) && eq(inters5[1].t, -4)) {
+        std::cout << "ray sphere intersection 5 OK" << std::endl;
+    } else {
+        std::cout << "ray sphere intersection 5 ERROR" << std::endl;
+    }
+}
+
+void test_hits() {
+    sphere s{0};
+    std::vector<intersection> inters{intersection{-1, s}, intersection{1, s}};
+    if (hit(inters).t == 1) {
+        std::cout << "hit 1 OK" << std::endl;
+    } else {
+        std::cout << "hit 2 OK" << std::endl;
+    }
+
+    inters = {intersection{5, s}, intersection{7, s}, intersection{-3, s}, intersection{2, s}};
+    if (hit(inters).t == 2) {
+        std::cout << "hit 2 OK" << std::endl;
+    } else {
+        std::cout << "hit 2 OK" << std::endl;
+    }
+
+    ray r{vect::point3(1, 2, 3), vect::vector3(0, 1, 0)};
+    ray r_trans = r.transform(mat::translation(3, 4, 5));
+    if (r_trans.origin == vect::point3(4, 6, 8) && r_trans.direction == vect::vector3(0, 1, 0)) {
+        std::cout << "ray transform 1 OK" << std::endl;
+    } else {
+        std::cout << "ray transform 1 ERROR" << std::endl;
+    }
+    r_trans = r.transform(mat::scaling(2, 3, 4));
+    if (r_trans.origin == vect::point3(2, 6, 12) && r_trans.direction == vect::vector3(0, 3, 0)) {
+        std::cout << "ray transform 2 OK" << std::endl;
+    } else {
+        std::cout << "ray transform 2 ERROR" << std::endl;
+    }
+
+    sphere s1{1};
+    ray r1{vect::point3(0, 0, -5), vect::vector3(0, 0, 1)};
+    s1.transform = mat::scaling(2, 2, 2);
+    inters = s1.interesect(r1);
+    if (inters.size() == 2 && inters[0].t == 3 && inters[1].t == 7) {
+        std::cout << "scaled sphere intersect OK" << std::endl;
+    } else {
+        std::cout << "scaled sphere intersect ERROR" << std::endl;
+    }
+
+    s1.transform = mat::translation(5, 0, 0);
+    inters = s1.interesect(r1);
+    if (inters.size() == 0) {
+        std::cout << "translated sphere intersect OK" << std::endl;
+    } else {
+        std::cout << "translated sphere intersect ERROR" << std::endl;
+    }
+}
+
 int main(void) {
     std::cout << std::endl
               << "testing vectors..." << std::endl;
@@ -258,5 +361,11 @@ int main(void) {
     std::cout << std::endl
               << "testing transforms..." << std::endl;
     test_transforms();
+    std::cout << std::endl
+              << "testing rays..." << std::endl;
+    test_rays();
+    std::cout << std::endl
+              << "testing hits..." << std::endl;
+    test_hits();
     return 0;
 }

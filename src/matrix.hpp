@@ -215,6 +215,8 @@ void matrix4x4::print() {
 }
 
 namespace mat {
+const matrix4x4 identity{{1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1}};
+
 matrix4x4 translation(float x, float y, float z) {
     return matrix4x4{{1, 0, 0, x, 0, 1, 0, y, 0, 0, 1, z, 0, 0, 0, 1}};
 }

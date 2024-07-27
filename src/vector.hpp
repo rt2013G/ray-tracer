@@ -19,6 +19,7 @@ struct vec {
     float z;
     float w;
     bool operator==(const vec &a);
+    bool operator!=(const vec &a);
     vec operator+(const vec &a);
     vec operator-(const vec &a);
     vec operator-();
@@ -31,12 +32,20 @@ struct vec {
 };
 
 bool vec::operator==(const vec &a) {
-    if (eq(this->x, a.x) && eq(this->y, a.y) && eq(this->z, a.z)) {
+    if (eq(this->x, a.x) && eq(this->y, a.y) && eq(this->z, a.z) && eq(this->w, a.w)) {
         return true;
     } else {
         return false;
     }
 };
+
+bool vec::operator!=(const vec &a) {
+    if (*this == a) {
+        return false;
+    } else {
+        return true;
+    }
+}
 
 vec vec::operator+(const vec &a) {
     return vec{
@@ -108,6 +117,13 @@ vec point3(float x, float y, float z) {
 vec vector3(float x, float y, float z) {
     return vec{x, y, z, 0};
 }
+
+const vec origin = point3(0, 0, 0);
+
+vec reflect(vec in, vec normal) {
+    return in - normal * 2 * in.dot(normal);
+}
+
 } // namespace vect
 
 #endif

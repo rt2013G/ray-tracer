@@ -15,33 +15,33 @@ void test_vector() {
     if (a == c) {
         std::cout << "== OK" << std::endl;
     } else {
-        std::cout << "== NOT OK" << std::endl;
+        std::cout << "== ERROR" << std::endl;
     }
 
     if (d == vec{3, -1, 7, -1}) {
         std::cout << "+ OK" << std::endl;
     } else {
-        std::cout << "+ NOT OK" << std::endl;
+        std::cout << "+ ERROR" << std::endl;
     }
 
     if (e == vec{-1, 5, -1, 9}) {
         std::cout << "- OK" << std::endl;
     } else {
-        std::cout << "- NOT OK" << std::endl;
+        std::cout << "- ERROR" << std::endl;
     }
 
     vec f{1, 2, 3, 0};
     if (eq(f.mag(), sqrt(14))) {
         std::cout << "mag() OK" << std::endl;
     } else {
-        std::cout << "mag() NOT OK" << std::endl;
+        std::cout << "mag() ERROR" << std::endl;
     }
 
     f = f.normalize();
     if (eq(f.x, 0.26726) && eq(f.y, 0.53452) && eq(f.z, 0.80178)) {
         std::cout << "normalize() OK" << std::endl;
     } else {
-        std::cout << "normalize() NOT OK" << std::endl;
+        std::cout << "normalize() ERROR" << std::endl;
     }
 
     vec g{1, 2, 3, 0};
@@ -50,14 +50,14 @@ void test_vector() {
     if (dot == 20) {
         std::cout << "dot() OK" << std::endl;
     } else {
-        std::cout << "dot() NOT OK" << std::endl;
+        std::cout << "dot() ERROR" << std::endl;
     }
 
     vec cross = g.cross(h);
     if (cross == vec{-1, 2, -1}) {
         std::cout << "cross() OK" << std::endl;
     } else {
-        std::cout << "cross() NOT OK" << std::endl;
+        std::cout << "cross() ERROR" << std::endl;
     }
 }
 
@@ -67,14 +67,14 @@ void test_canvas() {
         if (c.r == 0 && c.g == 0 && c.b == 0) {
             continue;
         } else {
-            std::cout << "canvas NOT OK" << std::endl;
+            std::cout << "canvas ERROR" << std::endl;
         }
     }
 
     canv.write(5, 5, color{0.5, 0.3, 0.4});
     color c = canv.get(5, 5);
     if (!eq(c.r, 0.5) || !eq(c.g, 0.3) || !eq(c.b, 0.4)) {
-        std::cout << "canvas NOT OK" << std::endl;
+        std::cout << "canvas ERROR" << std::endl;
         return;
     }
 
@@ -92,7 +92,7 @@ void test_matrices() {
     if (res == C) {
         std::cout << "matrix mul OK" << std::endl;
     } else {
-        std::cout << "matrix mul NOT OK" << std::endl;
+        std::cout << "matrix mul ERROR" << std::endl;
     }
 
     matrix4x4 D{{1, 2, 3, 4, 2, 4, 4, 2, 8, 6, 4, 1, 0, 0, 0, 1}};
@@ -102,7 +102,7 @@ void test_matrices() {
     if (Db == expected) {
         std::cout << "matrix * vec OK" << std::endl;
     } else {
-        std::cout << "matrix * vec NOT OK" << std::endl;
+        std::cout << "matrix * vec ERROR" << std::endl;
     }
 
     matrix4x4 E{{0, 9, 3, 0, 9, 8, 0, 8, 1, 8, 5, 3, 0, 0, 5, 8}};
@@ -111,14 +111,14 @@ void test_matrices() {
     if (Et == expected_mat) {
         std::cout << "matrix transpose OK" << std::endl;
     } else {
-        std::cout << "matrix transpose NOT OK" << std::endl;
+        std::cout << "matrix transpose ERROR" << std::endl;
     }
 
     matrix2x2 F{{1, 5, -3, 2}};
     if (F.det() == 17) {
         std::cout << "matrix2x2 det OK" << std::endl;
     } else {
-        std::cout << "matrix2x2 det NOT OK" << std::endl;
+        std::cout << "matrix2x2 det ERROR" << std::endl;
     }
 
     matrix4x4 G{{-6, 1, 1, 6, -8, 5, 8, 6, -1, 0, 8, 2, -7, 1, -1, 1}};
@@ -127,7 +127,7 @@ void test_matrices() {
     if (submat == expected_submat) {
         std::cout << "matrix4x4 submat OK" << std::endl;
     } else {
-        std::cout << "matrix4x4 submat NOT OK" << std::endl;
+        std::cout << "matrix4x4 submat ERROR" << std::endl;
     }
 
     matrix3x3 H{{1, 5, 0, -3, 2, 7, 0, 6, -3}};
@@ -136,28 +136,28 @@ void test_matrices() {
     if (submat2x2 == expected_submat2x2) {
         std::cout << "matrix3x3 submat OK" << std::endl;
     } else {
-        std::cout << "matrix3x3 submat NOT OK" << std::endl;
+        std::cout << "matrix3x3 submat ERROR" << std::endl;
     }
 
     matrix3x3 I{{3, 5, 0, 2, -1, -7, 6, -1, 5}};
     if (I.minor(1, 0) == 25 && I.cofactor(1, 0) == -25 && I.cofactor(0, 0) == -12) {
         std::cout << "matrix3x3 minor and cofactor OK" << std::endl;
     } else {
-        std::cout << "matrix3x3 minor and cofactor NOT OK" << std::endl;
+        std::cout << "matrix3x3 minor and cofactor ERROR" << std::endl;
     }
 
     matrix3x3 J{{1, 2, 6, -5, 8, -4, 2, 6, 4}};
     if (J.det() == -196) {
         std::cout << "matrix3x3 det OK" << std::endl;
     } else {
-        std::cout << "matrix3x3 det NOT OK" << std::endl;
+        std::cout << "matrix3x3 det ERROR" << std::endl;
     }
 
     matrix4x4 K{{-2, -8, 3, 5, -3, 1, 7, 3, 1, 2, -9, 6, -6, 7, 7, -9}};
     if (K.det() == -4071) {
         std::cout << "matrix4x4 det OK" << std::endl;
     } else {
-        std::cout << "matrix4x4 det NOT OK" << std::endl;
+        std::cout << "matrix4x4 det ERROR" << std::endl;
     }
 
     matrix4x4 L{{8, -5, 9, 2, 7, 5, 6, 1, -6, 0, 9, 6, -3, 0, -9, -4}};
@@ -165,7 +165,7 @@ void test_matrices() {
     if (L.inverse() == expected_inverse_L) {
         std::cout << "matrix4x4 inverse OK" << std::endl;
     } else {
-        std::cout << "matrix4x4 inverse NOT OK" << std::endl;
+        std::cout << "matrix4x4 inverse ERROR" << std::endl;
     }
 
     matrix4x4 M{{3, -9, 7, 3, 3, -8, 2, -9, -4, 4, 4, 1, -6, 5, -1, 1}};
@@ -175,7 +175,7 @@ void test_matrices() {
     if (O * N_inv == M) {
         std::cout << "matrix4x4 mul inverse OK" << std::endl;
     } else {
-        std::cout << "matrix4x4 mul inverse NOT OK" << std::endl;
+        std::cout << "matrix4x4 mul inverse ERROR" << std::endl;
     }
 }
 
@@ -348,6 +348,104 @@ void test_hits() {
     }
 }
 
+void test_normals() {
+    sphere s{0};
+    vec n = s.normal_at(vect::point3(1, 0, 0));
+    if (n == vect::vector3(1, 0, 0)) {
+        std::cout << "normal 1 OK" << std::endl;
+    } else {
+        std::cout << "normal 1 ERROR" << std::endl;
+    }
+
+    n = s.normal_at(vect::point3(sqrt(3) / 3, sqrt(3) / 3, sqrt(3) / 3));
+    if (n == vect::vector3(sqrt(3) / 3, sqrt(3) / 3, sqrt(3) / 3)) {
+        std::cout << "normal 2 OK" << std::endl;
+    } else {
+        std::cout << "normal 2 ERROR" << std::endl;
+    }
+
+    s.transform = mat::translation(0, 1, 0);
+    n = s.normal_at(vect::point3(0, 1.70711, -0.70711));
+    if (n == vect::vector3(0, 0.70711, -0.70711)) {
+        std::cout << "translated normal OK" << std::endl;
+    } else {
+        std::cout << "translated normal ERROR" << std::endl;
+    }
+
+    matrix4x4 A = mat::scaling(1, 0.5, 1);
+    matrix4x4 B = mat::rotation_z(M_PI / 5);
+    s.transform = A * B;
+    n = s.normal_at(vect::point3(0, sqrt(2) / 2, -sqrt(2) / 2));
+    if (n == vect::vector3(0, 0.97014, -0.24254)) {
+        std::cout << "translated normal 2 OK" << std::endl;
+    } else {
+        std::cout << "translated normal 2 ERROR" << std::endl;
+    }
+
+    vec v = vect::vector3(1, -1, 0);
+    n = vect::vector3(0, 1, 0);
+    vec r = vect::reflect(v, n);
+    if (r == vect::vector3(1, 1, 0)) {
+        std::cout << "reflect OK" << std::endl;
+    } else {
+        std::cout << "reflect ERROR" << std::endl;
+    }
+
+    v = vect::vector3(0, -1, 0);
+    n = vect::vector3(sqrt(2) / 2, sqrt(2) / 2, 0);
+    r = vect::reflect(v, n);
+    if (r == vect::vector3(1, 0, 0)) {
+        std::cout << "reflect 2 OK" << std::endl;
+    } else {
+        std::cout << "reflect 2 ERROR" << std::endl;
+    }
+}
+
+void test_lighting() {
+    material m{};
+    vec position = vect::origin;
+
+    vec eye = vect::vector3(0, 0, -1);
+    vec normal = vect::vector3(0, 0, -1);
+    point_light light{vect::point3(0, 0, -10), WHITE};
+    if (phong_lighting(m, position, light, eye, normal) == color{1.9, 1.9, 1.9}) {
+        std::cout << "lighting OK" << std::endl;
+    } else {
+        std::cout << "lighting ERROR" << std::endl;
+    }
+
+    eye = vect::vector3(0, sqrt(2) / 2, -sqrt(2) / 2);
+    if (phong_lighting(m, position, light, eye, normal) == WHITE) {
+        std::cout << "lighting 2 OK" << std::endl;
+    } else {
+        std::cout << "lighting 2 ERROR" << std::endl;
+    }
+
+    eye = vect::vector3(0, 0, -1);
+    light = {vect::point3(0, 10, -10), WHITE};
+    if (phong_lighting(m, position, light, eye, normal) == color(0.7364, 0.7364, 0.7364)) {
+        std::cout << "lighting 3 OK" << std::endl;
+    } else {
+        std::cout << "lighting 3 ERROR" << std::endl;
+    }
+
+    eye = vect::vector3(0, -sqrt(2) / 2, -sqrt(2) / 2);
+    normal = vect::vector3(0, 0, -1);
+    if (phong_lighting(m, position, light, eye, normal) == color(1.6364, 1.6364, 1.6364)) {
+        std::cout << "lighting 4 OK" << std::endl;
+    } else {
+        std::cout << "lighting 4 ERROR" << std::endl;
+    }
+
+    eye = vect::vector3(0, 0, -1);
+    light = {vect::point3(0, 0, 10), WHITE};
+    if (phong_lighting(m, position, light, eye, normal) == color(0.1, 0.1, 0.1)) {
+        std::cout << "lighting 5 OK" << std::endl;
+    } else {
+        std::cout << "lighting 5 ERROR" << std::endl;
+    }
+}
+
 int main(void) {
     std::cout << std::endl
               << "testing vectors..." << std::endl;
@@ -367,5 +465,11 @@ int main(void) {
     std::cout << std::endl
               << "testing hits..." << std::endl;
     test_hits();
+    std::cout << std::endl
+              << "testing normals..." << std::endl;
+    test_normals();
+    std::cout << std::endl
+              << "testing lighting..." << std::endl;
+    test_lighting();
     return 0;
 }

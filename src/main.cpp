@@ -6,14 +6,15 @@
 #include "vector.hpp"
 
 int main(void) {
-    const int WIDTH = 100;
-    const int HEIGHT = 100;
+    const int WIDTH = 128;
+    const int HEIGHT = 128;
     canvas canv{WIDTH, HEIGHT};
 
     sphere s{0};
-    matrix4x4 shear = mat::shearing(1, 0, 0, 0, 0, 0);
-    matrix4x4 scaling = mat::scaling(0.5, 1, 1);
-    s.transform = shear * scaling;
+    s.mat.surface = color(0.3, 0.5, 0.5);
+    matrix4x4 A = mat::scaling(0.3, 0.3, 0.3);
+    s.transform = A;
+    point_light light{vect::point3(-10, 10, -10), WHITE};
     vec r_origin = vect::point3(0, 0, -5);
     float wall_z = 10;
     float wall_size = 7;
@@ -27,10 +28,16 @@ int main(void) {
             vec position = vect::point3(world_x, world_y, wall_z);
             ray r{r_origin, (position - r_origin).normalize()};
             std::vector<intersection> inters = s.interesect(r);
-            for (intersection &i : inters) {
-                if (i.t > 0) {
-                    canv.write(x, y, color{1, 0, 0});
-                }
+            intersection i = hit(inters);
+            if (i.t >= 0) {
+                vec point = r.position(i.t);
+                vec normal = s.normal_at(point);
+                vec eye = -r.direction;
+                eye = eye.normalize();
+                color c = phong_lighting(s.mat, point, light, eye, normal);
+                canv.write(x, y, c);
+            } else {
+                canv.write(x, y, BLACK);
             }
         }
     }

@@ -301,14 +301,14 @@ void test_rays() {
 
 void test_hits() {
     sphere s{0};
-    std::vector<intersection> inters{intersection{-1, s}, intersection{1, s}};
+    std::vector<intersection> inters{intersection{-1, s.id}, intersection{1, s.id}};
     if (hit(inters).t == 1) {
         std::cout << "hit 1 OK" << std::endl;
     } else {
         std::cout << "hit 2 OK" << std::endl;
     }
 
-    inters = {intersection{5, s}, intersection{7, s}, intersection{-3, s}, intersection{2, s}};
+    inters = {intersection{5, s.id}, intersection{7, s.id}, intersection{-3, s.id}, intersection{2, s.id}};
     if (hit(inters).t == 2) {
         std::cout << "hit 2 OK" << std::endl;
     } else {
@@ -446,6 +446,16 @@ void test_lighting() {
     }
 }
 
+void test_world() {
+    world w{};
+    std::vector<intersection> inters = w.intersect(ray{vect::point3(0, 0, -5), vect::vector3(0, 0, 1)});
+    if (inters.size() == 4 && inters[0].t == 4 && inters[1].t == 4.5 && inters[2].t == 5.5 && inters[3].t == 6) {
+        std::cout << "world OK" << std::endl;
+    } else {
+        std::cout << "world ERROR" << std::endl;
+    }
+}
+
 int main(void) {
     std::cout << std::endl
               << "testing vectors..." << std::endl;
@@ -471,5 +481,8 @@ int main(void) {
     std::cout << std::endl
               << "testing lighting..." << std::endl;
     test_lighting();
+    std::cout << std::endl
+              << "testing world..." << std::endl;
+    test_world();
     return 0;
 }

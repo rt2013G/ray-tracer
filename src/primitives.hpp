@@ -1,6 +1,7 @@
 #ifndef RAY_HPP
 #define RAY_HPP
 
+#include <algorithm>
 #include <vector>
 
 #include "matrix.hpp"
@@ -23,32 +24,6 @@ ray ray::transform(matrix4x4 T) {
         T * this->direction};
     return r;
 };
-
-struct object {
-};
-
-struct intersection {
-    float t;
-    object obj;
-};
-
-intersection hit(std::vector<intersection> &inters) {
-    float t_min = INFINITY;
-    intersection hit{-INFINITY, {}};
-    if (inters.size() == 0) {
-        return hit;
-    }
-    for (intersection &i : inters) {
-        if (i.t < 0) {
-            continue;
-        }
-        if (i.t < t_min) {
-            t_min = i.t;
-            hit = i;
-        }
-    }
-    return hit;
-}
 
 struct point_light {
     vec position;
@@ -79,6 +54,37 @@ material::material() {
     this->diffuse = 0.9;
     this->specular = 0.9;
     this->shininess = 128;
+}
+
+struct intersection {
+    float t;
+    int id;
+};
+
+struct object {
+    int id;
+    matrix4x4 transform;
+    material mat;
+    std::vector<intersection> interesect(ray r);
+    vec normal_at(vec p);
+};
+
+intersection hit(std::vector<intersection> &inters) {
+    float t_min = INFINITY;
+    intersection hit{-INFINITY, {}};
+    if (inters.size() == 0) {
+        return hit;
+    }
+    for (intersection &i : inters) {
+        if (i.t < 0) {
+            continue;
+        }
+        if (i.t < t_min) {
+            t_min = i.t;
+            hit = i;
+        }
+    }
+    return hit;
 }
 
 color phong_lighting(material mat, vec p, point_light light, vec eye, vec normal) {
@@ -129,7 +135,7 @@ std::vector<intersection> sphere::interesect(ray r) {
     }
     float t1 = (-b - sqrt(discriminant)) / (2 * a);
     float t2 = (-b + sqrt(discriminant)) / (2 * a);
-    return std::vector<intersection>{intersection{t1, *this}, intersection{t2, *this}};
+    return std::vector<intersection>{intersection{t1, this->id}, intersection{t2, this->id}};
 }
 
 vec sphere::normal_at(vec p) {
@@ -138,6 +144,41 @@ vec sphere::normal_at(vec p) {
     vec world_normal = this->transform.inverse().transpose() * obj_normal;
     world_normal.w = 0;
     return world_normal.normalize();
+}
+
+struct world {
+    std::vector<point_light> plights;
+    std::vector<object> objects;
+    world();
+    std::vector<intersection> intersect(ray r);
+};
+
+bool interesection_sorter(intersection &i1, intersection &i2) {
+    return i1.t < i2.t;
+}
+
+std::vector<intersection> world::intersect(ray r) {
+    std::vector<intersection> inters{};
+    for (object &obj : this->objects) {
+        std::vector<intersection> result = obj.interesect(r);
+        for (intersection &i : result) {
+            inters.push_back(i);
+        }
+    }
+    std::sort(inters.begin(), inters.end(), interesection_sorter);
+    return inters;
+}
+
+world::world() {
+    this->plights.push_back(point_light{vect::point3(-10, 10, -10), WHITE});
+    sphere s{0};
+    s.transform = mat::scaling(0.5, 0.5, 0.5);
+    s.mat.surface = color(0.8, 1, 0.6);
+    s.mat.diffuse = 0.7;
+    s.mat.specular = 0.2;
+    sphere s1{1};
+    this->objects.push_back(s);
+    this->objects.push_back(s1);
 }
 
 #endif

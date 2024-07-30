@@ -266,10 +266,44 @@ void test_lighting() {
     PRINT_TEST(phong_lighting(m, position, light, eye, normal) == color(0.1, 0.1, 0.1), "lighting 5");
 }
 
+void test_computations() {
+    ray r{vect::point3(0, 0, -5), vect::vector3(0, 0, 1)};
+    object sphere{};
+    intersection i{4, sphere};
+    computation comp{i, r};
+    PRINT_TEST(comp.point == vect::point3(0, 0, -1) && comp.eye_vec == vect::vector3(0, 0, -1) && comp.normal_vec == vect::vector3(0, 0, -1) && comp.inside == false, "prepare computations");
+}
+
 void test_world() {
     world w{};
     std::vector<intersection> inters = w.intersect(ray{vect::point3(0, 0, -5), vect::vector3(0, 0, 1)});
     PRINT_TEST(inters.size() == 4 && inters[0].t == 4 && inters[1].t == 4.5 && inters[2].t == 5.5 && inters[3].t == 6, "world");
+
+    ray r{vect::point3(0, 0, -5), vect::vector3(0, 0, 1)};
+    object obj = w.objects[0];
+    intersection i{4, obj};
+    computation comp{i, r};
+    PRINT_TEST(w.shade_hit(comp) == color(0.38066, 0.47583, 0.2855), "shade hit 1");
+
+    w.plights[0] = point_light{vect::point3(0, 0.25, 0), WHITE};
+    r.origin = vect::point3(0, 0, 0);
+    obj = w.objects[1];
+    i.t = 0.5;
+    i.obj = obj;
+    computation comp2{i, r};
+    PRINT_TEST(w.shade_hit(comp2) == color(0.90498, 0.90498, 0.90498), "shade hit 2");
+
+    world w2{};
+    r = ray{vect::point3(0, 0, -5), vect::vector3(0, 1, 0)};
+    PRINT_TEST(w2.color_at(r) == BLACK, "color at 1");
+
+    r = ray{vect::point3(0, 0, -5), vect::vector3(0, 0, 1)};
+    PRINT_TEST(w2.color_at(r) == color{0.38066, 0.47583, 0.2855}, "color at 2");
+
+    w2.objects[0].mat.ambient = 1;
+    w2.objects[1].mat.ambient = 1;
+    r = ray{vect::point3(0, 0, 0.75), vect::vector3(0, 0, -1)};
+    PRINT_TEST(w2.color_at(r) == w2.objects[1].mat.surface, "color at 3");
 }
 
 int main(void) {
@@ -297,6 +331,9 @@ int main(void) {
     std::cout << std::endl
               << "testing lighting..." << std::endl;
     test_lighting();
+    std::cout << std::endl
+              << "testing computations..." << std::endl;
+    test_computations();
     std::cout << std::endl
               << "testing world..." << std::endl;
     test_world();

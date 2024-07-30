@@ -147,12 +147,52 @@ color phong_lighting(material mat, vec p, point_light light, vec eye, vec normal
     return ambient + diffuse + specular;
 }
 
+struct computation {
+    float t;
+    object obj;
+    vec point;
+    vec eye_vec;
+    vec normal_vec;
+    bool inside;
+    computation(intersection i, ray r);
+};
+
+computation::computation(intersection i, ray r) {
+    this->t = i.t;
+    this->obj = i.obj;
+    this->point = r.position(i.t);
+    this->eye_vec = -r.direction;
+    this->eye_vec.normalize();
+    this->normal_vec = normal_at(i.obj, this->point);
+    this->normal_vec.normalize();
+    if (this->normal_vec.dot(this->eye_vec) < 0) {
+        this->inside = true;
+        this->normal_vec = -this->normal_vec;
+    } else {
+        this->inside = false;
+    }
+}
+
 struct world {
     std::vector<point_light> plights;
     std::vector<object> objects;
     world();
     std::vector<intersection> intersect(ray r);
+    color shade_hit(computation comp);
+    color color_at(ray r);
 };
+
+world::world() {
+    this->plights.push_back(point_light{vect::point3(-10, 10, -10), WHITE});
+    object s1{};
+    s1.mat.surface = color(0.8, 1, 0.6);
+    s1.mat.diffuse = 0.7;
+    s1.mat.specular = 0.2;
+    object s2{};
+    s2.transform = mat::scaling(0.5, 0.5, 0.5);
+    this->objects.push_back(s1);
+    this->objects.push_back(s2);
+}
 
 bool interesection_sorter(intersection &i1, intersection &i2) {
     return i1.t < i2.t;
@@ -170,16 +210,22 @@ std::vector<intersection> world::intersect(ray r) {
     return inters;
 }
 
-world::world() {
-    this->plights.push_back(point_light{vect::point3(-10, 10, -10), WHITE});
-    object s{};
-    s.transform = mat::scaling(0.5, 0.5, 0.5);
-    s.mat.surface = color(0.8, 1, 0.6);
-    s.mat.diffuse = 0.7;
-    s.mat.specular = 0.2;
-    object s1{};
-    this->objects.push_back(s);
-    this->objects.push_back(s1);
+color world::shade_hit(computation comp) {
+    color c = BLACK;
+    for (point_light &pl : this->plights) {
+        c = c + phong_lighting(comp.obj.mat, comp.point, pl, comp.eye_vec, comp.normal_vec);
+    }
+    return c;
+}
+
+color world::color_at(ray r) {
+    std::vector<intersection> inters = this->intersect(r);
+    intersection i = hit(inters);
+    if (i.t < 0) {
+        return BLACK;
+    }
+    computation comp{i, r};
+    return this->shade_hit(comp);
 }
 
 #endif

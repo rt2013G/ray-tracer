@@ -1,9 +1,18 @@
 #include "iostream"
+#include "string"
 
 #include "../src/canvas.hpp"
 #include "../src/matrix.hpp"
 #include "../src/primitives.hpp"
 #include "../src/vector.hpp"
+
+void PRINT_TEST(bool p, std::string str) {
+    if (p) {
+        std::cout << str << " OK" << std::endl;
+    } else {
+        std::cout << str << " ERROR" << std::endl;
+    }
+}
 
 void test_vector() {
     vec a{1, 2, 3, 4};
@@ -12,53 +21,23 @@ void test_vector() {
     vec d = a + b;
     vec e = a - b;
 
-    if (a == c) {
-        std::cout << "== OK" << std::endl;
-    } else {
-        std::cout << "== ERROR" << std::endl;
-    }
-
-    if (d == vec{3, -1, 7, -1}) {
-        std::cout << "+ OK" << std::endl;
-    } else {
-        std::cout << "+ ERROR" << std::endl;
-    }
-
-    if (e == vec{-1, 5, -1, 9}) {
-        std::cout << "- OK" << std::endl;
-    } else {
-        std::cout << "- ERROR" << std::endl;
-    }
+    PRINT_TEST(a == c, "vec ==");
+    PRINT_TEST(d == vec{3, -1, 7, -1}, "vec +");
+    PRINT_TEST(e == vec{-1, 5, -1, 9}, "vec -");
 
     vec f{1, 2, 3, 0};
-    if (eq(f.mag(), sqrt(14))) {
-        std::cout << "mag() OK" << std::endl;
-    } else {
-        std::cout << "mag() ERROR" << std::endl;
-    }
+    PRINT_TEST(eq(f.mag(), sqrt(14)), "vec mag()");
 
     f = f.normalize();
-    if (eq(f.x, 0.26726) && eq(f.y, 0.53452) && eq(f.z, 0.80178)) {
-        std::cout << "normalize() OK" << std::endl;
-    } else {
-        std::cout << "normalize() ERROR" << std::endl;
-    }
+    PRINT_TEST(eq(f.x, 0.26726) && eq(f.y, 0.53452) && eq(f.z, 0.80178), "vec normalize()");
 
     vec g{1, 2, 3, 0};
     vec h{2, 3, 4, 0};
     float dot = g.dot(h);
-    if (dot == 20) {
-        std::cout << "dot() OK" << std::endl;
-    } else {
-        std::cout << "dot() ERROR" << std::endl;
-    }
+    PRINT_TEST(dot == 20, "vec dot()");
 
     vec cross = g.cross(h);
-    if (cross == vec{-1, 2, -1}) {
-        std::cout << "cross() OK" << std::endl;
-    } else {
-        std::cout << "cross() ERROR" << std::endl;
-    }
+    PRINT_TEST(cross == vec{-1, 2, -1}, "vec cross()");
 }
 
 void test_canvas() {
@@ -89,120 +68,64 @@ void test_matrices() {
     matrix4x4 C{{20, 22, 50, 48, 44, 54, 114, 108, 40, 58, 110, 102, 16, 26, 46, 42}};
 
     matrix4x4 res = A * B;
-    if (res == C) {
-        std::cout << "matrix mul OK" << std::endl;
-    } else {
-        std::cout << "matrix mul ERROR" << std::endl;
-    }
+    PRINT_TEST(res == C, "matrix mul");
 
     matrix4x4 D{{1, 2, 3, 4, 2, 4, 4, 2, 8, 6, 4, 1, 0, 0, 0, 1}};
     vec b = {1, 2, 3, 1};
     vec Db = D * b;
     vec expected = {18, 24, 33, 1};
-    if (Db == expected) {
-        std::cout << "matrix * vec OK" << std::endl;
-    } else {
-        std::cout << "matrix * vec ERROR" << std::endl;
-    }
+    PRINT_TEST(Db == expected, "matrix * vec");
 
     matrix4x4 E{{0, 9, 3, 0, 9, 8, 0, 8, 1, 8, 5, 3, 0, 0, 5, 8}};
     matrix4x4 expected_mat{{0, 9, 1, 0, 9, 8, 8, 0, 3, 0, 5, 5, 0, 8, 3, 8}};
     matrix4x4 Et = E.transpose();
-    if (Et == expected_mat) {
-        std::cout << "matrix transpose OK" << std::endl;
-    } else {
-        std::cout << "matrix transpose ERROR" << std::endl;
-    }
+    PRINT_TEST(Et == expected_mat, "matrix transpose");
 
     matrix2x2 F{{1, 5, -3, 2}};
-    if (F.det() == 17) {
-        std::cout << "matrix2x2 det OK" << std::endl;
-    } else {
-        std::cout << "matrix2x2 det ERROR" << std::endl;
-    }
+    PRINT_TEST(F.det() == 17, "matrix2x2 det");
 
     matrix4x4 G{{-6, 1, 1, 6, -8, 5, 8, 6, -1, 0, 8, 2, -7, 1, -1, 1}};
     matrix3x3 submat = G.submatrix(2, 1);
     matrix3x3 expected_submat{{-6, 1, 6, -8, 8, 6, -7, -1, 1}};
-    if (submat == expected_submat) {
-        std::cout << "matrix4x4 submat OK" << std::endl;
-    } else {
-        std::cout << "matrix4x4 submat ERROR" << std::endl;
-    }
+    PRINT_TEST(submat == expected_submat, "matrix4x4 submat");
 
     matrix3x3 H{{1, 5, 0, -3, 2, 7, 0, 6, -3}};
     matrix2x2 expected_submat2x2{{-3, 2, 0, 6}};
     matrix2x2 submat2x2 = H.submatrix(0, 2);
-    if (submat2x2 == expected_submat2x2) {
-        std::cout << "matrix3x3 submat OK" << std::endl;
-    } else {
-        std::cout << "matrix3x3 submat ERROR" << std::endl;
-    }
+    PRINT_TEST(submat2x2 == expected_submat2x2, "matrix3x3 submat");
 
     matrix3x3 I{{3, 5, 0, 2, -1, -7, 6, -1, 5}};
-    if (I.minor(1, 0) == 25 && I.cofactor(1, 0) == -25 && I.cofactor(0, 0) == -12) {
-        std::cout << "matrix3x3 minor and cofactor OK" << std::endl;
-    } else {
-        std::cout << "matrix3x3 minor and cofactor ERROR" << std::endl;
-    }
+    PRINT_TEST(I.minor(1, 0) == 25 && I.cofactor(1, 0) == -25 && I.cofactor(0, 0) == -12, "matrix3x3 minor and cofactor");
 
     matrix3x3 J{{1, 2, 6, -5, 8, -4, 2, 6, 4}};
-    if (J.det() == -196) {
-        std::cout << "matrix3x3 det OK" << std::endl;
-    } else {
-        std::cout << "matrix3x3 det ERROR" << std::endl;
-    }
+    PRINT_TEST(J.det() == -196, "matrix3x3 det");
 
     matrix4x4 K{{-2, -8, 3, 5, -3, 1, 7, 3, 1, 2, -9, 6, -6, 7, 7, -9}};
-    if (K.det() == -4071) {
-        std::cout << "matrix4x4 det OK" << std::endl;
-    } else {
-        std::cout << "matrix4x4 det ERROR" << std::endl;
-    }
+    PRINT_TEST(K.det() == -4071, "matrix4x4 det");
 
     matrix4x4 L{{8, -5, 9, 2, 7, 5, 6, 1, -6, 0, 9, 6, -3, 0, -9, -4}};
     matrix4x4 expected_inverse_L{{-0.15385, -0.15385, -0.28205, -0.53846, -0.07692, 0.12308, 0.02564, 0.03077, 0.35897, 0.35897, 0.43590, 0.92308, -0.69231, -0.69231, -0.76923, -1.92308}};
-    if (L.inverse() == expected_inverse_L) {
-        std::cout << "matrix4x4 inverse OK" << std::endl;
-    } else {
-        std::cout << "matrix4x4 inverse ERROR" << std::endl;
-    }
+    PRINT_TEST(L.inverse() == expected_inverse_L, "matrix4x4 inverse");
 
     matrix4x4 M{{3, -9, 7, 3, 3, -8, 2, -9, -4, 4, 4, 1, -6, 5, -1, 1}};
     matrix4x4 N{{8, 2, 2, 2, 3, -1, 7, 0, 7, 0, 5, 4, 6, -2, 0, 5}};
     matrix4x4 N_inv = N.inverse();
     matrix4x4 O = M * N;
-    if (O * N_inv == M) {
-        std::cout << "matrix4x4 mul inverse OK" << std::endl;
-    } else {
-        std::cout << "matrix4x4 mul inverse ERROR" << std::endl;
-    }
+    PRINT_TEST(O * N_inv == M, "matrix4x4 mul inverse");
 }
 
 void test_transforms() {
     vec v{-3, 4, 5, 0};
     vec p{-3, 4, 5, 1};
     matrix4x4 transform = mat::translation(5, -3, 2);
-    if ((v == transform * v) && (transform * p == vec{2, 1, 7, 1})) {
-        std::cout << "mat translation OK" << std::endl;
-    } else {
-        std::cout << "mat translation ERROR" << std::endl;
-    }
+    PRINT_TEST((v == transform * v) && (transform * p == vec{2, 1, 7, 1}), "mat translation");
 
     matrix4x4 scal = mat::scaling(2, 3, 4);
     vec p2{-4, 6, 8, 1};
-    if (scal * p2 == vec{-8, 18, 32, 1}) {
-        std::cout << "mat scaling OK" << std::endl;
-    } else {
-        std::cout << "mat scaling ERROR" << std::endl;
-    }
+    PRINT_TEST(scal * p2 == vec{-8, 18, 32, 1}, "mat scaling");
 
     matrix4x4 reflection = mat::scaling(-1, 1, 1);
-    if (reflection * p2 == vec{4, 6, 8, 1}) {
-        std::cout << "mat reflection OK" << std::endl;
-    } else {
-        std::cout << "mat reflection ERROR" << std::endl;
-    }
+    PRINT_TEST(reflection * p2 == vec{4, 6, 8, 1}, "mat reflection");
 
     vec px{0, 1, 0, 1};
     vec py{0, 0, 1, 1};
@@ -211,22 +134,15 @@ void test_transforms() {
     matrix4x4 rot_y = mat::rotation_y(M_PI / 4);
     matrix4x4 rot_z = mat::rotation_z(M_PI / 4);
     float sqrt2 = sqrt(2);
-    if (rot_x * px == vec{0, sqrt2 / 2, sqrt2 / 2, 1} &&
-        rot_y * py == vec{sqrt2 / 2, 0, sqrt2 / 2, 1} &&
-        rot_z * pz == vec{-sqrt2 / 2, sqrt2 / 2, 0, 1}) {
-        std::cout << "mat rotation x OK" << std::endl;
-    } else {
-        std::cout << "mat rotation x ERROR" << std::endl;
-    }
+    PRINT_TEST(rot_x * px == vec{0, sqrt2 / 2, sqrt2 / 2, 1} &&
+                   rot_y * py == vec{sqrt2 / 2, 0, sqrt2 / 2, 1} &&
+                   rot_z * pz == vec{-sqrt2 / 2, sqrt2 / 2, 0, 1},
+               "mat rotation");
 
     matrix4x4 shxy = mat::shearing(1, 0, 0, 0, 0, 0);
     matrix4x4 shzx = mat::shearing(0, 0, 0, 0, 1, 0);
     vec ps{2, 3, 4, 1};
-    if (shxy * ps == vec{5, 3, 4, 1} && shzx * ps == vec{2, 3, 6, 1}) {
-        std::cout << "mat shearing OK" << std::endl;
-    } else {
-        std::cout << "mat shearing ERROR" << std::endl;
-    }
+    PRINT_TEST(shxy * ps == vec{5, 3, 4, 1} && shzx * ps == vec{2, 3, 6, 1}, "mat shearing");
 
     vec point{1, 0, 1, 1};
     matrix4x4 A = mat::rotation_x(M_PI / 2);
@@ -239,166 +155,90 @@ void test_transforms() {
     matrix4x4 T = C * B * A;
     vec point_t = T * point;
     vec expected_point = vec{15, 0, 7, 1};
-    if (point_rst == expected_point && point_t == expected_point) {
-        std::cout << "mat chained transforms OK" << std::endl;
-    } else {
-        std::cout << "mat chained transforms ERROR" << std::endl;
-    }
+    PRINT_TEST(point_rst == expected_point && point_t == expected_point, "mat chained transforms");
 }
 
 void test_rays() {
     ray r{vect::point3(2, 3, 4),
           vect::vector3(1, 0, 0)};
-
     vec p2 = r.position(2.5);
-    if (p2 == vect::point3(4.5, 3, 4)) {
-        std::cout << "rays position OK" << std::endl;
-    } else {
-        std::cout << "rays position ERROR";
-    }
+    PRINT_TEST(p2 == vect::point3(4.5, 3, 4), "ray position");
 
-    sphere s{0};
+    object s{};
     ray r2{vect::point3(0, 0, -5), vect::vector3(0, 0, 1)};
-    std::vector<intersection> inters = s.interesect(r2);
-    if (inters.size() == 2 && eq(inters[0].t, 4.0) && eq(inters[1].t, 6.0)) {
-        std::cout << "ray sphere intersection 1 OK" << std::endl;
-    } else {
-        std::cout << "ray sphere intersection 1 ERROR" << std::endl;
-    }
+    std::vector<intersection> inters = intersect_sphere(s, r2);
+    PRINT_TEST(inters.size() == 2 && eq(inters[0].t, 4.0) && eq(inters[1].t, 6.0), "ray sphere intersection 1");
 
     ray r3{vect::point3(0, 1, -5), vect::vector3(0, 0, 1)};
-    std::vector<intersection> inters2 = s.interesect(r3);
-    if (inters2.size() == 2 && eq(inters2[0].t, 5.0) && eq(inters2[1].t, 5.0)) {
-        std::cout << "ray sphere intersection 2 OK" << std::endl;
-    } else {
-        std::cout << "ray sphere intersection 2 ERROR" << std::endl;
-    }
+    std::vector<intersection> inters2 = intersect_sphere(s, r3);
+    PRINT_TEST(inters2.size() == 2 && eq(inters2[0].t, 5.0) && eq(inters2[1].t, 5.0), "ray sphere intersection 2");
 
     ray r4{vect::point3(0, 2, -5), vect::vector3(0, 0, 1)};
-    std::vector<intersection> inters3 = s.interesect(r4);
-    if (inters3.size() == 0) {
-        std::cout << "ray sphere intersection 3 OK" << std::endl;
-    } else {
-        std::cout << "ray sphere intersection 3 ERROR" << std::endl;
-    }
+    std::vector<intersection> inters3 = intersect_sphere(s, r4);
+    PRINT_TEST(inters3.size() == 0, "ray sphere intersection 3");
 
     ray r5{vect::point3(0, 0, 0), vect::vector3(0, 0, 1)};
-    std::vector<intersection> inters4 = s.interesect(r5);
-    if (inters4.size() == 2 && eq(inters4[0].t, -1) && eq(inters4[1].t, 1)) {
-        std::cout << "ray sphere intersection 4 OK" << std::endl;
-    } else {
-        std::cout << "ray sphere intersection 4 ERROR" << std::endl;
-    }
+    std::vector<intersection> inters4 = intersect_sphere(s, r5);
+    PRINT_TEST(inters4.size() == 2 && eq(inters4[0].t, -1) && eq(inters4[1].t, 1), "ray sphere intersection 4");
 
     ray r6{vect::point3(0, 0, 5), vect::vector3(0, 0, 1)};
-    std::vector<intersection> inters5 = s.interesect(r6);
-    if (inters5.size() == 2 && eq(inters5[0].t, -6) && eq(inters5[1].t, -4)) {
-        std::cout << "ray sphere intersection 5 OK" << std::endl;
-    } else {
-        std::cout << "ray sphere intersection 5 ERROR" << std::endl;
-    }
+    std::vector<intersection> inters5 = intersect_sphere(s, r6);
+    PRINT_TEST(inters5.size() == 2 && eq(inters5[0].t, -6) && eq(inters5[1].t, -4), "ray sphere intersection 5");
 }
 
 void test_hits() {
-    sphere s{0};
-    std::vector<intersection> inters{intersection{-1, s.id}, intersection{1, s.id}};
-    if (hit(inters).t == 1) {
-        std::cout << "hit 1 OK" << std::endl;
-    } else {
-        std::cout << "hit 2 OK" << std::endl;
-    }
+    object s{};
+    std::vector<intersection> inters{intersection{-1, s}, intersection{1, s}};
+    PRINT_TEST(hit(inters).t == 1, "hit 1");
 
-    inters = {intersection{5, s.id}, intersection{7, s.id}, intersection{-3, s.id}, intersection{2, s.id}};
-    if (hit(inters).t == 2) {
-        std::cout << "hit 2 OK" << std::endl;
-    } else {
-        std::cout << "hit 2 OK" << std::endl;
-    }
+    inters = {intersection{5, s}, intersection{7, s}, intersection{-3, s}, intersection{2, s}};
+    PRINT_TEST(hit(inters).t == 2, "hit 2");
 
     ray r{vect::point3(1, 2, 3), vect::vector3(0, 1, 0)};
     ray r_trans = r.transform(mat::translation(3, 4, 5));
-    if (r_trans.origin == vect::point3(4, 6, 8) && r_trans.direction == vect::vector3(0, 1, 0)) {
-        std::cout << "ray transform 1 OK" << std::endl;
-    } else {
-        std::cout << "ray transform 1 ERROR" << std::endl;
-    }
-    r_trans = r.transform(mat::scaling(2, 3, 4));
-    if (r_trans.origin == vect::point3(2, 6, 12) && r_trans.direction == vect::vector3(0, 3, 0)) {
-        std::cout << "ray transform 2 OK" << std::endl;
-    } else {
-        std::cout << "ray transform 2 ERROR" << std::endl;
-    }
+    PRINT_TEST(r_trans.origin == vect::point3(4, 6, 8) && r_trans.direction == vect::vector3(0, 1, 0), "ray transform 1");
 
-    sphere s1{1};
+    r_trans = r.transform(mat::scaling(2, 3, 4));
+    PRINT_TEST(r_trans.origin == vect::point3(2, 6, 12) && r_trans.direction == vect::vector3(0, 3, 0), "ray transform 2");
+
+    object s1{};
     ray r1{vect::point3(0, 0, -5), vect::vector3(0, 0, 1)};
     s1.transform = mat::scaling(2, 2, 2);
-    inters = s1.interesect(r1);
-    if (inters.size() == 2 && inters[0].t == 3 && inters[1].t == 7) {
-        std::cout << "scaled sphere intersect OK" << std::endl;
-    } else {
-        std::cout << "scaled sphere intersect ERROR" << std::endl;
-    }
+    inters = intersect_sphere(s1, r1);
+    PRINT_TEST(inters.size() == 2 && inters[0].t == 3 && inters[1].t == 7, "scaled sphere intersect");
 
     s1.transform = mat::translation(5, 0, 0);
-    inters = s1.interesect(r1);
-    if (inters.size() == 0) {
-        std::cout << "translated sphere intersect OK" << std::endl;
-    } else {
-        std::cout << "translated sphere intersect ERROR" << std::endl;
-    }
+    inters = intersect_sphere(s1, r1);
+    PRINT_TEST(inters.size() == 0, "translated sphere intersect");
 }
 
 void test_normals() {
-    sphere s{0};
-    vec n = s.normal_at(vect::point3(1, 0, 0));
-    if (n == vect::vector3(1, 0, 0)) {
-        std::cout << "normal 1 OK" << std::endl;
-    } else {
-        std::cout << "normal 1 ERROR" << std::endl;
-    }
+    object s{};
+    vec n = normal_at(s, vect::point3(1, 0, 0));
+    PRINT_TEST(n == vect::vector3(1, 0, 0), "normal 1");
 
-    n = s.normal_at(vect::point3(sqrt(3) / 3, sqrt(3) / 3, sqrt(3) / 3));
-    if (n == vect::vector3(sqrt(3) / 3, sqrt(3) / 3, sqrt(3) / 3)) {
-        std::cout << "normal 2 OK" << std::endl;
-    } else {
-        std::cout << "normal 2 ERROR" << std::endl;
-    }
+    n = normal_at(s, vect::point3(sqrt(3) / 3, sqrt(3) / 3, sqrt(3) / 3));
+    PRINT_TEST(n == vect::vector3(sqrt(3) / 3, sqrt(3) / 3, sqrt(3) / 3), "normal 2");
 
     s.transform = mat::translation(0, 1, 0);
-    n = s.normal_at(vect::point3(0, 1.70711, -0.70711));
-    if (n == vect::vector3(0, 0.70711, -0.70711)) {
-        std::cout << "translated normal OK" << std::endl;
-    } else {
-        std::cout << "translated normal ERROR" << std::endl;
-    }
+    n = normal_at(s, vect::point3(0, 1.70711, -0.70711));
+    PRINT_TEST(n == vect::vector3(0, 0.70711, -0.70711), "translated normal");
 
     matrix4x4 A = mat::scaling(1, 0.5, 1);
     matrix4x4 B = mat::rotation_z(M_PI / 5);
     s.transform = A * B;
-    n = s.normal_at(vect::point3(0, sqrt(2) / 2, -sqrt(2) / 2));
-    if (n == vect::vector3(0, 0.97014, -0.24254)) {
-        std::cout << "translated normal 2 OK" << std::endl;
-    } else {
-        std::cout << "translated normal 2 ERROR" << std::endl;
-    }
+    n = normal_at(s, vect::point3(0, sqrt(2) / 2, -sqrt(2) / 2));
+    PRINT_TEST(n == vect::vector3(0, 0.97014, -0.24254), "translated normal 2");
 
     vec v = vect::vector3(1, -1, 0);
     n = vect::vector3(0, 1, 0);
     vec r = vect::reflect(v, n);
-    if (r == vect::vector3(1, 1, 0)) {
-        std::cout << "reflect OK" << std::endl;
-    } else {
-        std::cout << "reflect ERROR" << std::endl;
-    }
+    PRINT_TEST(r == vect::vector3(1, 1, 0), "reflect");
 
     v = vect::vector3(0, -1, 0);
     n = vect::vector3(sqrt(2) / 2, sqrt(2) / 2, 0);
     r = vect::reflect(v, n);
-    if (r == vect::vector3(1, 0, 0)) {
-        std::cout << "reflect 2 OK" << std::endl;
-    } else {
-        std::cout << "reflect 2 ERROR" << std::endl;
-    }
+    PRINT_TEST(r == vect::vector3(1, 0, 0), "reflect 2");
 }
 
 void test_lighting() {
@@ -408,52 +248,28 @@ void test_lighting() {
     vec eye = vect::vector3(0, 0, -1);
     vec normal = vect::vector3(0, 0, -1);
     point_light light{vect::point3(0, 0, -10), WHITE};
-    if (phong_lighting(m, position, light, eye, normal) == color{1.9, 1.9, 1.9}) {
-        std::cout << "lighting OK" << std::endl;
-    } else {
-        std::cout << "lighting ERROR" << std::endl;
-    }
+    PRINT_TEST(phong_lighting(m, position, light, eye, normal) == color{1.9, 1.9, 1.9}, "lighting");
 
     eye = vect::vector3(0, sqrt(2) / 2, -sqrt(2) / 2);
-    if (phong_lighting(m, position, light, eye, normal) == WHITE) {
-        std::cout << "lighting 2 OK" << std::endl;
-    } else {
-        std::cout << "lighting 2 ERROR" << std::endl;
-    }
+    PRINT_TEST(phong_lighting(m, position, light, eye, normal) == WHITE, "lighting 2");
 
     eye = vect::vector3(0, 0, -1);
     light = {vect::point3(0, 10, -10), WHITE};
-    if (phong_lighting(m, position, light, eye, normal) == color(0.7364, 0.7364, 0.7364)) {
-        std::cout << "lighting 3 OK" << std::endl;
-    } else {
-        std::cout << "lighting 3 ERROR" << std::endl;
-    }
+    PRINT_TEST(phong_lighting(m, position, light, eye, normal) == color(0.7364, 0.7364, 0.7364), "lighting 3");
 
     eye = vect::vector3(0, -sqrt(2) / 2, -sqrt(2) / 2);
     normal = vect::vector3(0, 0, -1);
-    if (phong_lighting(m, position, light, eye, normal) == color(1.6364, 1.6364, 1.6364)) {
-        std::cout << "lighting 4 OK" << std::endl;
-    } else {
-        std::cout << "lighting 4 ERROR" << std::endl;
-    }
+    PRINT_TEST(phong_lighting(m, position, light, eye, normal) == color(1.6364, 1.6364, 1.6364), "lighting 4");
 
     eye = vect::vector3(0, 0, -1);
     light = {vect::point3(0, 0, 10), WHITE};
-    if (phong_lighting(m, position, light, eye, normal) == color(0.1, 0.1, 0.1)) {
-        std::cout << "lighting 5 OK" << std::endl;
-    } else {
-        std::cout << "lighting 5 ERROR" << std::endl;
-    }
+    PRINT_TEST(phong_lighting(m, position, light, eye, normal) == color(0.1, 0.1, 0.1), "lighting 5");
 }
 
 void test_world() {
     world w{};
     std::vector<intersection> inters = w.intersect(ray{vect::point3(0, 0, -5), vect::vector3(0, 0, 1)});
-    if (inters.size() == 4 && inters[0].t == 4 && inters[1].t == 4.5 && inters[2].t == 5.5 && inters[3].t == 6) {
-        std::cout << "world OK" << std::endl;
-    } else {
-        std::cout << "world ERROR" << std::endl;
-    }
+    PRINT_TEST(inters.size() == 4 && inters[0].t == 4 && inters[1].t == 4.5 && inters[2].t == 5.5 && inters[3].t == 6, "world");
 }
 
 int main(void) {

@@ -56,22 +56,62 @@ material::material() {
     this->shininess = 128;
 }
 
-struct intersection {
-    float t;
-    int id;
-};
-
 struct object {
     int id;
     matrix4x4 transform;
     material mat;
-    std::vector<intersection> interesect(ray r);
-    vec normal_at(vec p);
+    object();
+    object(matrix4x4 transform, material mat);
 };
+
+uint CURRENT_ID = 0;
+object::object() {
+    this->id = CURRENT_ID;
+    CURRENT_ID++;
+    this->transform = mat::identity;
+    this->mat = material();
+}
+
+object::object(matrix4x4 transform, material mat) {
+    this->id = CURRENT_ID;
+    CURRENT_ID++;
+    this->transform = transform;
+    this->mat = mat;
+}
+
+struct intersection {
+    float t;
+    object obj;
+};
+
+std::vector<intersection> intersect_sphere(object sphere, ray r) {
+    r = r.transform(sphere.transform.inverse());
+    vec sphere_to_r = r.origin - vect::point3(0, 0, 0);
+    float a = r.direction.dot(r.direction);
+    float b = 2 * r.direction.dot(sphere_to_r);
+    float c = sphere_to_r.dot(sphere_to_r) - 1;
+
+    float discriminant = pow(b, 2) - 4 * a * c;
+    if (discriminant < 0) {
+        return std::vector<intersection>();
+    }
+    float t1 = (-b - sqrt(discriminant)) / (2 * a);
+    float t2 = (-b + sqrt(discriminant)) / (2 * a);
+    return std::vector<intersection>{intersection{t1, sphere}, intersection{t2, sphere}};
+}
+
+vec normal_at(object obj, vec p) {
+    matrix4x4 invers_trans = obj.transform.inverse();
+    vec obj_p = invers_trans * p;
+    vec obj_normal = obj_p - vect::origin;
+    vec world_normal = invers_trans.transpose() * obj_normal;
+    world_normal.w = 0;
+    return world_normal.normalize();
+}
 
 intersection hit(std::vector<intersection> &inters) {
     float t_min = INFINITY;
-    intersection hit{-INFINITY, {}};
+    intersection hit{-INFINITY};
     if (inters.size() == 0) {
         return hit;
     }
@@ -107,45 +147,6 @@ color phong_lighting(material mat, vec p, point_light light, vec eye, vec normal
     return ambient + diffuse + specular;
 }
 
-struct sphere : object {
-    int id;
-    matrix4x4 transform;
-    material mat;
-    sphere(int id);
-    std::vector<intersection> interesect(ray r);
-    vec normal_at(vec p);
-};
-
-sphere::sphere(int id) {
-    this->id = id;
-    this->transform = mat::identity;
-    this->mat = material();
-}
-
-std::vector<intersection> sphere::interesect(ray r) {
-    r = r.transform(this->transform.inverse());
-    vec sphere_to_r = r.origin - vect::point3(0, 0, 0);
-    float a = r.direction.dot(r.direction);
-    float b = 2 * r.direction.dot(sphere_to_r);
-    float c = sphere_to_r.dot(sphere_to_r) - 1;
-
-    float discriminant = pow(b, 2) - 4 * a * c;
-    if (discriminant < 0) {
-        return std::vector<intersection>();
-    }
-    float t1 = (-b - sqrt(discriminant)) / (2 * a);
-    float t2 = (-b + sqrt(discriminant)) / (2 * a);
-    return std::vector<intersection>{intersection{t1, this->id}, intersection{t2, this->id}};
-}
-
-vec sphere::normal_at(vec p) {
-    vec obj_p = this->transform.inverse() * p;
-    vec obj_normal = obj_p - vect::origin;
-    vec world_normal = this->transform.inverse().transpose() * obj_normal;
-    world_normal.w = 0;
-    return world_normal.normalize();
-}
-
 struct world {
     std::vector<point_light> plights;
     std::vector<object> objects;
@@ -160,7 +161,7 @@ bool interesection_sorter(intersection &i1, intersection &i2) {
 std::vector<intersection> world::intersect(ray r) {
     std::vector<intersection> inters{};
     for (object &obj : this->objects) {
-        std::vector<intersection> result = obj.interesect(r);
+        std::vector<intersection> result = intersect_sphere(obj, r);
         for (intersection &i : result) {
             inters.push_back(i);
         }
@@ -171,12 +172,12 @@ std::vector<intersection> world::intersect(ray r) {
 
 world::world() {
     this->plights.push_back(point_light{vect::point3(-10, 10, -10), WHITE});
-    sphere s{0};
+    object s{};
     s.transform = mat::scaling(0.5, 0.5, 0.5);
     s.mat.surface = color(0.8, 1, 0.6);
     s.mat.diffuse = 0.7;
     s.mat.specular = 0.2;
-    sphere s1{1};
+    object s1{};
     this->objects.push_back(s);
     this->objects.push_back(s1);
 }

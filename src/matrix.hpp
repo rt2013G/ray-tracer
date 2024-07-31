@@ -84,7 +84,7 @@ float matrix3x3::det() {
 
 struct matrix4x4 {
     float val[16];
-    bool operator==(matrix4x4 &mat);
+    bool operator==(const matrix4x4 &mat);
     matrix4x4 operator*(matrix4x4 &mat);
     vec operator*(vec &v);
     matrix4x4 transpose();
@@ -96,7 +96,7 @@ struct matrix4x4 {
     void print();
 };
 
-bool matrix4x4::operator==(matrix4x4 &mat) {
+bool matrix4x4::operator==(const matrix4x4 &mat) {
     for (int i = 0; i < 16; i++) {
         if (!eq(this->val[i], mat.val[i])) {
             return false;
@@ -239,6 +239,17 @@ matrix4x4 rotation_z(float radians) {
 
 matrix4x4 shearing(float xy, float xz, float yx, float yz, float zx, float zy) {
     return matrix4x4({1, xy, xz, 0, yx, 1, yz, 0, zx, zy, 1, 0, 0, 0, 0, 1});
+}
+
+matrix4x4 view_transform(vec from, vec to, vec up) {
+    vec forward = to - from;
+    forward.normalize();
+    up.normalize();
+    vec left = forward.cross(up);
+    vec true_up = left.cross(forward);
+    matrix4x4 orientation{{left.x, left.y, left.z, 0, true_up.x, true_up.y, true_up.z, 0, -forward.x, -forward.y, -forward.z, 0, 0, 0, 0, 1}};
+    matrix4x4 transl = mat::translation(-from.x, -from.y, -from.z);
+    return orientation * transl;
 }
 
 } // namespace mat

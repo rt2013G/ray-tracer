@@ -304,6 +304,44 @@ void test_world() {
     w2.objects[1].mat.ambient = 1;
     r = ray{vect::point3(0, 0, 0.75), vect::vector3(0, 0, -1)};
     PRINT_TEST(w2.color_at(r) == w2.objects[1].mat.surface, "color at 3");
+
+    matrix4x4 view = mat::view_transform(vect::point3(0, 0, 0), vect::point3(0, 0, -1), vect::vector3(0, 1, 0));
+    PRINT_TEST(view == mat::identity, "view transform 1");
+
+    view = mat::view_transform(vect::point3(0, 0, 0), vect::point3(0, 0, 1), vect::vector3(0, 1, 0));
+    PRINT_TEST(view == mat::scaling(-1, 1, -1), "view transform 2");
+
+    view = mat::view_transform(vect::point3(0, 0, 8), vect::point3(0, 0, 0), vect::vector3(0, 1, 0));
+    PRINT_TEST(view == mat::translation(0, 0, -8), "view transform 3");
+
+    view = mat::view_transform(vect::point3(1, 3, 2), vect::point3(4, -2, 8), vect::vector3(1, 1, 0));
+    PRINT_TEST(view == matrix4x4{{-0.50709, 0.50709, 0.67612, -2.36643, 0.76772, 0.60609, 0.12122, -2.82843, -0.35857, 0.59761, -0.71714, 0.00000, 0.00000, 0.00000, 0.00000, 1.00000}}, "view transform 4");
+}
+
+void test_camera() {
+    camera c(200, 125, M_PI / 2);
+    PRINT_TEST(eq(c.pixel_size, 0.01), "camera 1");
+
+    c = camera(125, 200, M_PI / 2);
+    PRINT_TEST(eq(c.pixel_size, 0.01), "camera 2");
+
+    c = camera(201, 101, M_PI / 2);
+    ray r = c.ray_for_pixel(100, 50);
+    PRINT_TEST(r.origin == vect::point3(0, 0, 0) && r.direction == vect::vector3(0, 0, -1), "camera ray for pixel 1");
+
+    r = c.ray_for_pixel(0, 0);
+    PRINT_TEST(r.origin == vect::point3(0, 0, 0) && r.direction == vect::vector3(0.66519, 0.33259, -0.66851), "camera ray for pixel 2");
+
+    matrix4x4 A = mat::rotation_y(M_PI / 4);
+    matrix4x4 B = mat::translation(0, -2, 5);
+    c.transform = A * B;
+    r = c.ray_for_pixel(100, 50);
+    PRINT_TEST(r.origin == vect::point3(0, 2, -5) && r.direction == vect::vector3(sqrt(2) / 2, 0, -sqrt(2) / 2), "camera ray for pixel 3");
+
+    world w{};
+    c = camera(11, 11, M_PI / 2, mat::view_transform(vect::point3(0, 0, -5), vect::point3(0, 0, 0), vect::vector3(0, 1, 0)));
+    canvas image = c.render(w);
+    PRINT_TEST(image.get(5, 5) == color(0.38066, 0.47583, 0.2855), "camera render");
 }
 
 int main(void) {
@@ -337,5 +375,8 @@ int main(void) {
     std::cout << std::endl
               << "testing world..." << std::endl;
     test_world();
+    std::cout << std::endl
+              << "testing camera..." << std::endl;
+    test_camera();
     return 0;
 }

@@ -6,43 +6,57 @@
 #include "vector.hpp"
 
 int main(void) {
-    const int WIDTH = 128;
-    const int HEIGHT = 128;
-    canvas canv{WIDTH, HEIGHT};
+    const int WIDTH = 1024;
+    const int HEIGHT = 1024;
 
-    sphere s{0};
-    s.mat.surface = color(0.3, 0.5, 0.5);
-    matrix4x4 A = mat::scaling(0.3, 0.3, 0.3);
-    s.transform = A;
-    point_light light{vect::point3(-10, 10, -10), WHITE};
-    vec r_origin = vect::point3(0, 0, -5);
-    float wall_z = 10;
-    float wall_size = 7;
-    float pixel_size = wall_size / WIDTH;
-    float half = wall_size / 2;
+    object floor = object(mat::scaling(10, 0.01, 10));
+    floor.mat.surface = color(0.4, 1, 0.4);
 
-    for (int y = 0; y < HEIGHT; y++) {
-        float world_y = half - pixel_size * y;
-        for (int x = 0; x < WIDTH; x++) {
-            float world_x = -half + pixel_size * x;
-            vec position = vect::point3(world_x, world_y, wall_z);
-            ray r{r_origin, (position - r_origin).normalize()};
-            std::vector<intersection> inters = s.interesect(r);
-            intersection i = hit(inters);
-            if (i.t >= 0) {
-                vec point = r.position(i.t);
-                vec normal = s.normal_at(point);
-                vec eye = -r.direction;
-                eye = eye.normalize();
-                color c = phong_lighting(s.mat, point, light, eye, normal);
-                canv.write(x, y, c);
-            } else {
-                canv.write(x, y, BLACK);
-            }
-        }
-    }
+    matrix4x4 A = mat::translation(0, 0, 5);
+    matrix4x4 B = mat::rotation_y(-M_PI / 4);
+    matrix4x4 C = mat::rotation_x(M_PI / 2);
+    matrix4x4 D = mat::scaling(10, 0.01, 10);
+    object left_w = object(A * B * C * D);
+    left_w.mat.surface = color(0.7, 0.8, 1);
+    left_w.mat.shininess = 16;
 
-    canv.to_ppm();
+    B = mat::rotation_y(M_PI / 4);
+    object right_w = object(A * B * C * D);
+    right_w.mat = left_w.mat;
+
+    object base = object(mat::translation(0, 0.5, 0));
+    base.mat.surface = WHITE;
+
+    A = mat::translation(0, 1.75, 0);
+    B = mat::scaling(0.6, 0.6, 0.6);
+    object middle = object(A * B);
+    middle.mat.surface = WHITE;
+
+    A = mat::translation(0.17, 1.95, -0.8);
+    B = mat::scaling(0.06, 0.06, 0.06);
+    object left_eye = object(A * B);
+    left_eye.mat.surface = BLACK;
+
+    A = mat::translation(-0.17, 1.95, -0.8);
+    object right_eye = object(A * B);
+    right_eye.mat = left_eye.mat;
+
+    A = mat::translation(0, 1.75, -0.8);
+    object nose = object(A * B);
+    nose.mat.surface = color(1, 0.65, 0);
+    nose.mat.diffuse = 1;
+    nose.mat.specular = 0;
+
+    point_light plight{vect::point3(-10, 10, -10), WHITE};
+    std::vector<point_light> lights{plight};
+    std::vector<object> objects{floor, left_w, right_w, base, middle, left_eye, right_eye, nose};
+    world w(lights, objects);
+
+    camera c(WIDTH, HEIGHT, M_PI / 3);
+    c.transform = mat::view_transform(vect::point3(0, 1.5, -5), vect::point3(0, 1, 0), vect::vector3(0, 1, 0));
+
+    canvas image = c.render(w);
+    image.to_ppm();
 
     return 0;
 }

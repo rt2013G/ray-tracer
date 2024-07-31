@@ -8,3 +8,7 @@ This is a Ray Tracer built while following the book "The Ray Tracer Challenge: A
 
 ##### A sphere
 <img src="https://imgur.com/6YzIG73.png" width=256 height=256>
+
+### Chapter 7
+##### A snowman
+<img src="https://imgur.com/wTCii1I.png" width=256 height=256>

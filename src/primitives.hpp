@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <vector>
 
+#include "canvas.hpp"
 #include "matrix.hpp"
 #include "vector.hpp"
 
@@ -61,14 +62,22 @@ struct object {
     matrix4x4 transform;
     material mat;
     object();
+    object(matrix4x4 transform);
     object(matrix4x4 transform, material mat);
 };
 
-uint CURRENT_ID = 0;
+static uint CURRENT_ID = 0;
 object::object() {
     this->id = CURRENT_ID;
     CURRENT_ID++;
     this->transform = mat::identity;
+    this->mat = material();
+}
+
+object::object(matrix4x4 transform) {
+    this->id = CURRENT_ID;
+    CURRENT_ID++;
+    this->transform = transform;
     this->mat = material();
 }
 
@@ -177,6 +186,7 @@ struct world {
     std::vector<point_light> plights;
     std::vector<object> objects;
     world();
+    world(std::vector<point_light> plights, std::vector<object> objects);
     std::vector<intersection> intersect(ray r);
     color shade_hit(computation comp);
     color color_at(ray r);
@@ -192,6 +202,11 @@ world::world() {
     s2.transform = mat::scaling(0.5, 0.5, 0.5);
     this->objects.push_back(s1);
     this->objects.push_back(s2);
+}
+
+world::world(std::vector<point_light> plights, std::vector<object> objects) {
+    this->plights = plights;
+    this->objects = objects;
 }
 
 bool interesection_sorter(intersection &i1, intersection &i2) {
@@ -226,6 +241,87 @@ color world::color_at(ray r) {
     }
     computation comp{i, r};
     return this->shade_hit(comp);
+}
+
+struct camera {
+    float hsize;
+    float vsize;
+    float fov;
+    matrix4x4 transform;
+    float half_width;
+    float half_height;
+    float pixel_size;
+    void compute_pixel_size();
+    camera();
+    camera(int hsize, int vsize, float fov);
+    camera(int hsize, int vsize, float fov, matrix4x4 transform);
+    ray ray_for_pixel(int x, int y);
+    canvas render(world w);
+};
+
+void camera::compute_pixel_size() {
+    float half_view = tan(this->fov / 2);
+    float aspect_ratio = this->hsize / this->vsize;
+    if (aspect_ratio >= 1) {
+        this->half_width = half_view;
+        this->half_height = half_view / aspect_ratio;
+    } else {
+        this->half_width = half_view * aspect_ratio;
+        this->half_height = half_view;
+    }
+    this->pixel_size = (this->half_width * 2) / this->hsize;
+}
+
+camera::camera() {
+    this->hsize = 160;
+    this->vsize = 120;
+    this->fov = M_PI / 2;
+    this->transform = mat::identity;
+    this->compute_pixel_size();
+}
+
+camera::camera(int hsize, int vsize, float fov) {
+    this->hsize = hsize;
+    this->vsize = vsize;
+    this->fov = fov;
+    this->transform = mat::identity;
+    this->compute_pixel_size();
+}
+
+camera::camera(int hsize, int vsize, float fov, matrix4x4 transform) {
+    this->hsize = hsize;
+    this->vsize = vsize;
+    this->fov = fov;
+    this->transform = transform;
+    this->compute_pixel_size();
+}
+
+ray camera::ray_for_pixel(int px, int py) {
+    float x_offset = (px + 0.5) * this->pixel_size;
+    float y_offset = (py + 0.5) * this->pixel_size;
+    float world_x = this->half_width - x_offset;
+    float world_y = this->half_height - y_offset;
+    matrix4x4 inv_transf = this->transform.inverse();
+    vec v = vect::point3(world_x, world_y, -1);
+    vec pixel = inv_transf * v;
+    vec o = vect::point3(0, 0, 0);
+    vec origin = inv_transf * o;
+    vec direction = (pixel - origin).normalize();
+
+    return ray{origin, direction};
+}
+
+canvas camera::render(world w) {
+    canvas c{int(this->hsize), int(this->vsize)};
+    for (int y = 0; y < this->vsize; y++) {
+        for (int x = 0; x < this->hsize; x++) {
+            ray r{this->ray_for_pixel(x, y)};
+            color col = w.color_at(r);
+            c.write(x, y, col);
+        }
+    }
+
+    return c;
 }
 
 #endif

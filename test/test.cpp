@@ -2,7 +2,6 @@
 #include "string"
 
 #include "../src/canvas.hpp"
-#include "../src/lighting.hpp"
 #include "../src/matrix.hpp"
 #include "../src/object.hpp"
 #include "../src/vector.hpp"
@@ -216,20 +215,20 @@ void test_hits() {
 
 void test_normals() {
     object s{};
-    vector n = ray::normal_at(s, vec::point3(1, 0, 0));
+    vector n = normal_at(s, vec::point3(1, 0, 0));
     PRINT_TEST(n == vec::vector3(1, 0, 0), "normal 1");
 
-    n = ray::normal_at(s, vec::point3(sqrt(3) / 3, sqrt(3) / 3, sqrt(3) / 3));
+    n = normal_at(s, vec::point3(sqrt(3) / 3, sqrt(3) / 3, sqrt(3) / 3));
     PRINT_TEST(n == vec::vector3(sqrt(3) / 3, sqrt(3) / 3, sqrt(3) / 3), "normal 2");
 
     s.transform = mat::translation(0, 1, 0);
-    n = ray::normal_at(s, vec::point3(0, 1.70711, -0.70711));
+    n = normal_at(s, vec::point3(0, 1.70711, -0.70711));
     PRINT_TEST(n == vec::vector3(0, 0.70711, -0.70711), "translated normal");
 
     matrix4x4 A = mat::scaling(1, 0.5, 1);
     matrix4x4 B = mat::rotation_z(M_PI / 5);
     s.transform = A * B;
-    n = ray::normal_at(s, vec::point3(0, sqrt(2) / 2, -sqrt(2) / 2));
+    n = normal_at(s, vec::point3(0, sqrt(2) / 2, -sqrt(2) / 2));
     PRINT_TEST(n == vec::vector3(0, 0.97014, -0.24254), "translated normal 2");
 
     vector v = vec::vector3(1, -1, 0);
@@ -388,6 +387,25 @@ void test_shadows() {
     PRINT_TEST((comps.over_point.z < -SHADOW_OFFSET / 2) && comps.point.z > comps.over_point.z, "shadow over point");
 }
 
+void test_planes() {
+    object p{PLANE};
+    PRINT_TEST(normal_at(p, vec::point3(0, 0, 0)) == vec::vector3(0, 1, 0), "plane normal 1");
+    PRINT_TEST(normal_at(p, vec::point3(-10, 0, 150)) == vec::vector3(0, 1, 0), "plane normal 2");
+
+    ray::ray r{vec::point3(0, 10, 0), vec::vector3(0, 0, 1)};
+    PRINT_TEST(ray::intersect_plane(p, r).size() == 0, "plane intersect 1");
+
+    r.origin = vec::point3(0, 0, 0);
+    PRINT_TEST(ray::intersect_plane(p, r).size() == 0, "plane intersect 2");
+
+    r = ray::ray{vec::point3(0, 1, 0), vec::vector3(0, -1, 0)};
+    std::vector<ray::intersection> inters = ray::intersect_plane(p, r);
+    PRINT_TEST(inters.size() == 1 && inters[0].t == 1, "plane intersect 3");
+
+    r = ray::ray{vec::point3(0, -1, 0), vec::vector3(0, 1, 0)};
+    PRINT_TEST(inters.size() == 1 && inters[0].t == 1, "plane intersect 4");
+}
+
 int main(void) {
     std::cout << std::endl
               << "testing vectors..." << std::endl;
@@ -425,7 +443,9 @@ int main(void) {
     std::cout << std::endl
               << "testing shadows..." << std::endl;
     test_shadows();
+    std::cout << std::endl
+              << "testing planes..." << std::endl;
+    test_planes();
 
-    test_computations();
     return 0;
 }

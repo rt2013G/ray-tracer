@@ -4,7 +4,6 @@
 
 #include "vector"
 
-#include "lighting.hpp"
 #include "object.hpp"
 
 struct world {
@@ -42,7 +41,7 @@ bool interesection_sorter(ray::intersection &i1, ray::intersection &i2) {
 std::vector<ray::intersection> world::intersect(ray::ray r) {
     std::vector<ray::intersection> inters{};
     for (object &obj : this->objects) {
-        std::vector<ray::intersection> result = intersect_sphere(obj, r);
+        std::vector<ray::intersection> result = ray::intersect_object(obj, r);
         for (ray::intersection &i : result) {
             inters.push_back(i);
         }

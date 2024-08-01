@@ -12,3 +12,10 @@ This is a Ray Tracer built while following the book "The Ray Tracer Challenge: A
 ### Chapter 7
 ##### A snowman
 <img src="https://imgur.com/wTCii1I.png" width=256 height=256>
+
+### Chapter 9
+##### Balls
+<img src="https://imgur.com/UsWyiwE.png" width=256 height=256>
+
+##### Balls, from above
+<img src="https://imgur.com/VWdIbk4.png" width=256 height=256>

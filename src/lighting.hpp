@@ -81,6 +81,7 @@ struct computation {
     float t;
     object obj;
     vector point;
+    vector over_point;
     vector eye_vec;
     vector normal_vec;
     bool inside;
@@ -91,16 +92,15 @@ computation::computation(intersection i, ray r) {
     this->t = i.t;
     this->obj = i.obj;
     this->point = r.find_position(i.t);
-    this->eye_vec = -r.direction;
-    this->eye_vec.normalize();
-    this->normal_vec = normal_at(i.obj, this->point);
-    this->normal_vec.normalize();
+    this->eye_vec = (-r.direction).normalize();
+    this->normal_vec = normal_at(i.obj, this->point).normalize();
     if (vec::dot(this->normal_vec, this->eye_vec) < 0) {
         this->inside = true;
         this->normal_vec = -this->normal_vec;
     } else {
         this->inside = false;
     }
+    this->over_point = this->point + this->normal_vec * SHADOW_OFFSET;
 }
 } // namespace ray
 
@@ -109,9 +109,12 @@ struct point_light {
     color intensity;
 };
 
-color phong_lighting(material mat, vector p, point_light light, vector eye, vector normal) {
+color phong_lighting(material mat, vector p, point_light light, vector eye, vector normal, bool in_shadow = false) {
     color effective_color = mat.surface * light.intensity;
     color ambient = effective_color * mat.ambient;
+    if (in_shadow) {
+        return ambient;
+    }
     color diffuse = BLACK;
     color specular = BLACK;
     vector light_dir = (light.position - p).normalize();

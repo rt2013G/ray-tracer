@@ -3,8 +3,8 @@
 
 #include "math.h"
 
-#define EPSILON 0.0001f
-#define SHADOW_OFFSET 0.001f
+#define EPSILON 0.01f
+#define SHADOW_OFFSET 0.01f
 
 bool eq(const float &f1, const float &f2) {
     if (abs(f1 - f2) < EPSILON) {
@@ -72,9 +72,9 @@ vector vector::operator-() {
 
 vector vector::operator*(const float &c) {
     return vector{
-        this->x *= c,
-        this->y *= c,
-        this->z *= c,
+        this->x * c,
+        this->y * c,
+        this->z * c,
         this->w,
     };
 };

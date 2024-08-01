@@ -13,6 +13,7 @@ struct world {
     world();
     world(std::vector<point_light> plights, std::vector<object> objects);
     std::vector<ray::intersection> intersect(ray::ray r);
+    bool is_shadowed(point_light light, vector point);
     color shade_hit(ray::computation comp);
     color color_at(ray::ray r);
 };
@@ -50,10 +51,29 @@ std::vector<ray::intersection> world::intersect(ray::ray r) {
     return inters;
 }
 
+bool world::is_shadowed(point_light light, vector point) {
+    vector v = light.position - point;
+    float distance = v.mag();
+    vector direction = v.normalize();
+
+    ray::ray r{point, direction};
+    std::vector<ray::intersection> inters = this->intersect(r);
+    ray::intersection i = ray::hit(inters);
+    if (i.t < 0) {
+        return false;
+    }
+    if (i.t > 0 && i.t < distance) {
+        return true;
+    }
+    return false;
+}
+
 color world::shade_hit(ray::computation comp) {
     color c = BLACK;
     for (point_light &pl : this->plights) {
-        c = c + phong_lighting(comp.obj.mat, comp.point, pl, comp.eye_vec, comp.normal_vec);
+        c = c + phong_lighting(comp.obj.mat, comp.over_point, pl,
+                               comp.eye_vec, comp.normal_vec,
+                               this->is_shadowed(pl, comp.over_point));
     }
     return c;
 }

@@ -198,7 +198,7 @@ void test_hits() {
 
     ray::ray r{vec::point3(1, 2, 3), vec::vector3(0, 1, 0)};
     ray::ray r_trans = r.transform(mat::translation(3, 4, 5));
-    PRINT_TEST(r_trans.origin == vec::point3(4, 6, 8) && r_trans.direction == vec::vector3(0, 1, 0), "ray::ray transform 1");
+    PRINT_TEST(r_trans.origin == vec::point3(4, 6, 8) && r_trans.direction == vec::vector3(0, 1, 0), "ray transform 1");
 
     r_trans = r.transform(mat::scaling(2, 3, 4));
     PRINT_TEST(r_trans.origin == vec::point3(2, 6, 12) && r_trans.direction == vec::vector3(0, 3, 0), "ray transform 2");
@@ -346,6 +346,48 @@ void test_camera() {
     PRINT_TEST(image.get(5, 5) == color(0.38066, 0.47583, 0.2855), "camera render");
 }
 
+void test_shadows() {
+    material mat = material();
+    vector position = vec::point3(0, 0, 0);
+    vector eye_vector = vec::vector3(0, 0, -1);
+    vector normal_vector = vec::vector3(0, 0, -1);
+    point_light light{vec::point3(0, 0, -10), WHITE};
+    bool in_shadow = true;
+    color result = phong_lighting(mat, position, light, eye_vector, normal_vector, in_shadow);
+    PRINT_TEST(result == color(0.1, 0.1, 0.1), "in shadow");
+
+    world w{};
+    vector p = vec::point3(0, 10, 0);
+    PRINT_TEST(w.is_shadowed(w.plights[0], p) == false, "is shadowed 1");
+
+    p = vec::point3(10, -10, 10);
+    PRINT_TEST(w.is_shadowed(w.plights[0], p) == true, "is shadowed 2");
+
+    p = vec::point3(-20, 20, -20);
+    PRINT_TEST(w.is_shadowed(w.plights[0], p) == false, "is shadowed 3");
+
+    p = vec::point3(-2, 2, -2);
+    PRINT_TEST(w.is_shadowed(w.plights[0], p) == false, "is shadowed 4");
+
+    w.plights[0] = point_light{vec::point3(0, 0, -10), WHITE};
+    object s1{};
+    object s2{};
+    s2.transform = mat::translation(0, 0, 10);
+    w.objects = std::vector<object>{s1, s2};
+    ray::ray r{vec::point3(0, 0, 5), vec::vector3(0, 0, 1)};
+    ray::intersection i{4, s2};
+    ray::computation comps{i, r};
+    color c = w.shade_hit(comps);
+    PRINT_TEST(c == color(0.1, 0.1, 0.1), "shadowed shade hit");
+
+    r = ray::ray{vec::point3(0, 0, -5), vec::vector3(0, 0, 1)};
+    object shape{};
+    shape.transform = mat::translation(0, 0, 1);
+    i = ray::intersection{5, shape};
+    comps = ray::computation{i, r};
+    PRINT_TEST((comps.over_point.z < -SHADOW_OFFSET / 2) && comps.point.z > comps.over_point.z, "shadow over point");
+}
+
 int main(void) {
     std::cout << std::endl
               << "testing vectors..." << std::endl;
@@ -380,5 +422,10 @@ int main(void) {
     std::cout << std::endl
               << "testing camera..." << std::endl;
     test_camera();
+    std::cout << std::endl
+              << "testing shadows..." << std::endl;
+    test_shadows();
+
+    test_computations();
     return 0;
 }

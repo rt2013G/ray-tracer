@@ -3,7 +3,8 @@
 
 #include "math.h"
 
-const float EPSILON = 0.0001f;
+#define EPSILON 0.0001f
+#define SHADOW_OFFSET 0.001f
 
 bool eq(const float &f1, const float &f2) {
     if (abs(f1 - f2) < EPSILON) {
@@ -13,25 +14,23 @@ bool eq(const float &f1, const float &f2) {
     }
 }
 
-struct vec {
+struct vector {
     float x;
     float y;
     float z;
     float w;
-    bool operator==(const vec &a);
-    bool operator!=(const vec &a);
-    vec operator+(const vec &a);
-    vec operator-(const vec &a);
-    vec operator-();
-    vec operator*(const float &c);
+    bool operator==(const vector &a);
+    bool operator!=(const vector &a);
+    vector operator+(const vector &a);
+    vector operator-(const vector &a);
+    vector operator-();
+    vector operator*(const float &c);
     float mag();
-    vec normalize();
-    float dot(const vec &a);
-    vec cross(const vec &a);
+    vector normalize();
     void print();
 };
 
-bool vec::operator==(const vec &a) {
+bool vector::operator==(const vector &a) {
     if (eq(this->x, a.x) && eq(this->y, a.y) && eq(this->z, a.z) && eq(this->w, a.w)) {
         return true;
     } else {
@@ -39,7 +38,7 @@ bool vec::operator==(const vec &a) {
     }
 };
 
-bool vec::operator!=(const vec &a) {
+bool vector::operator!=(const vector &a) {
     if (*this == a) {
         return false;
     } else {
@@ -47,32 +46,32 @@ bool vec::operator!=(const vec &a) {
     }
 }
 
-vec vec::operator+(const vec &a) {
-    return vec{
+vector vector::operator+(const vector &a) {
+    return vector{
         this->x + a.x,
         this->y + a.y,
         this->z + a.z,
         this->w + a.w};
 };
 
-vec vec::operator-(const vec &a) {
-    return vec{
+vector vector::operator-(const vector &a) {
+    return vector{
         this->x - a.x,
         this->y - a.y,
         this->z - a.z,
         this->w - a.w};
 };
 
-vec vec::operator-() {
-    return vec{
+vector vector::operator-() {
+    return vector{
         -this->x,
         -this->y,
         -this->z,
         -this->w};
 };
 
-vec vec::operator*(const float &c) {
-    return vec{
+vector vector::operator*(const float &c) {
+    return vector{
         this->x *= c,
         this->y *= c,
         this->z *= c,
@@ -80,50 +79,49 @@ vec vec::operator*(const float &c) {
     };
 };
 
-float vec::mag() {
+float vector::mag() {
     return sqrt(pow(this->x, 2) + pow(this->y, 2) + pow(this->z, 2));
 };
 
-vec vec::normalize() {
+vector vector::normalize() {
     float mag = this->mag();
-    this->x /= mag;
-    this->y /= mag;
-    this->z /= mag;
-    return *this;
+    return vector{this->x /= mag,
+                  this->y /= mag,
+                  this->z /= mag, this->w};
 };
 
-float vec::dot(const vec &a) {
-    return this->x * a.x + this->y * a.y + this->z * a.z + this->w * a.w;
+void vector::print() {
+    std::cout << this->x << " " << this->y << " " << this->z << " " << this->w << std::endl;
 }
 
-vec vec::cross(const vec &a) {
-    return vec{
-        this->y * a.z - this->z * a.y,
-        this->z * a.x - this->x * a.z,
-        this->x * a.y - this->y * a.x,
+namespace vec {
+vector point3(float x, float y, float z) {
+    return vector{x, y, z, 1};
+}
+
+vector vector3(float x, float y, float z) {
+    return vector{x, y, z, 0};
+}
+
+const vector origin = point3(0, 0, 0);
+
+float dot(const vector &a, const vector &b) {
+    return a.x * b.x + a.y * b.y + a.z * b.z + a.w * b.w;
+}
+
+vector cross(const vector &a, const vector &b) {
+    return vector{
+        a.y * b.z - a.z * b.y,
+        a.z * b.x - a.x * b.z,
+        a.x * b.y - a.y * b.x,
         0,
     };
 };
 
-void vec::print() {
-    std::cout << this->x << " " << this->y << " " << this->z << " " << this->w << std::endl;
+vector reflect(vector in, vector normal) {
+    return in - normal * 2 * dot(in, normal);
 }
 
-namespace vect {
-vec point3(float x, float y, float z) {
-    return vec{x, y, z, 1};
-}
-
-vec vector3(float x, float y, float z) {
-    return vec{x, y, z, 0};
-}
-
-const vec origin = point3(0, 0, 0);
-
-vec reflect(vec in, vec normal) {
-    return in - normal * 2 * in.dot(normal);
-}
-
-} // namespace vect
+} // namespace vec
 
 #endif

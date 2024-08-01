@@ -2,9 +2,11 @@
 #include "string"
 
 #include "../src/canvas.hpp"
+#include "../src/lighting.hpp"
 #include "../src/matrix.hpp"
-#include "../src/primitives.hpp"
+#include "../src/object.hpp"
 #include "../src/vector.hpp"
+#include "../src/world.hpp"
 
 void PRINT_TEST(bool p, std::string str) {
     if (p) {
@@ -15,29 +17,29 @@ void PRINT_TEST(bool p, std::string str) {
 }
 
 void test_vector() {
-    vec a{1, 2, 3, 4};
-    vec b{2, -3, 4, -5};
-    vec c{1, 2, 3, 4};
-    vec d = a + b;
-    vec e = a - b;
+    vector a{1, 2, 3, 4};
+    vector b{2, -3, 4, -5};
+    vector c{1, 2, 3, 4};
+    vector d = a + b;
+    vector e = a - b;
 
-    PRINT_TEST(a == c, "vec ==");
-    PRINT_TEST(d == vec{3, -1, 7, -1}, "vec +");
-    PRINT_TEST(e == vec{-1, 5, -1, 9}, "vec -");
+    PRINT_TEST(a == c, "vector ==");
+    PRINT_TEST(d == vector{3, -1, 7, -1}, "vector +");
+    PRINT_TEST(e == vector{-1, 5, -1, 9}, "vector -");
 
-    vec f{1, 2, 3, 0};
-    PRINT_TEST(eq(f.mag(), sqrt(14)), "vec mag()");
+    vector f{1, 2, 3, 0};
+    PRINT_TEST(eq(f.mag(), sqrt(14)), "vector mag()");
 
     f = f.normalize();
-    PRINT_TEST(eq(f.x, 0.26726) && eq(f.y, 0.53452) && eq(f.z, 0.80178), "vec normalize()");
+    PRINT_TEST(eq(f.x, 0.26726) && eq(f.y, 0.53452) && eq(f.z, 0.80178), "vector normalize()");
 
-    vec g{1, 2, 3, 0};
-    vec h{2, 3, 4, 0};
-    float dot = g.dot(h);
-    PRINT_TEST(dot == 20, "vec dot()");
+    vector g{1, 2, 3, 0};
+    vector h{2, 3, 4, 0};
+    float dot = vec::dot(g, h);
+    PRINT_TEST(dot == 20, "vector dot()");
 
-    vec cross = g.cross(h);
-    PRINT_TEST(cross == vec{-1, 2, -1}, "vec cross()");
+    vector cross = vec::cross(g, h);
+    PRINT_TEST(cross == vector{-1, 2, -1}, "vector cross()");
 }
 
 void test_canvas() {
@@ -71,10 +73,10 @@ void test_matrices() {
     PRINT_TEST(res == C, "matrix mul");
 
     matrix4x4 D{{1, 2, 3, 4, 2, 4, 4, 2, 8, 6, 4, 1, 0, 0, 0, 1}};
-    vec b = {1, 2, 3, 1};
-    vec Db = D * b;
-    vec expected = {18, 24, 33, 1};
-    PRINT_TEST(Db == expected, "matrix * vec");
+    vector b = {1, 2, 3, 1};
+    vector Db = D * b;
+    vector expected = {18, 24, 33, 1};
+    PRINT_TEST(Db == expected, "matrix * vector");
 
     matrix4x4 E{{0, 9, 3, 0, 9, 8, 0, 8, 1, 8, 5, 3, 0, 0, 5, 8}};
     matrix4x4 expected_mat{{0, 9, 1, 0, 9, 8, 8, 0, 3, 0, 5, 5, 0, 8, 3, 8}};
@@ -115,94 +117,94 @@ void test_matrices() {
 }
 
 void test_transforms() {
-    vec v{-3, 4, 5, 0};
-    vec p{-3, 4, 5, 1};
+    vector v{-3, 4, 5, 0};
+    vector p{-3, 4, 5, 1};
     matrix4x4 transform = mat::translation(5, -3, 2);
-    PRINT_TEST((v == transform * v) && (transform * p == vec{2, 1, 7, 1}), "mat translation");
+    PRINT_TEST((v == transform * v) && (transform * p == vector{2, 1, 7, 1}), "mat translation");
 
     matrix4x4 scal = mat::scaling(2, 3, 4);
-    vec p2{-4, 6, 8, 1};
-    PRINT_TEST(scal * p2 == vec{-8, 18, 32, 1}, "mat scaling");
+    vector p2{-4, 6, 8, 1};
+    PRINT_TEST(scal * p2 == vector{-8, 18, 32, 1}, "mat scaling");
 
     matrix4x4 reflection = mat::scaling(-1, 1, 1);
-    PRINT_TEST(reflection * p2 == vec{4, 6, 8, 1}, "mat reflection");
+    PRINT_TEST(reflection * p2 == vector{4, 6, 8, 1}, "mat reflection");
 
-    vec px{0, 1, 0, 1};
-    vec py{0, 0, 1, 1};
-    vec pz{0, 1, 0, 1};
+    vector px{0, 1, 0, 1};
+    vector py{0, 0, 1, 1};
+    vector pz{0, 1, 0, 1};
     matrix4x4 rot_x = mat::rotation_x(M_PI / 4);
     matrix4x4 rot_y = mat::rotation_y(M_PI / 4);
     matrix4x4 rot_z = mat::rotation_z(M_PI / 4);
     float sqrt2 = sqrt(2);
-    PRINT_TEST(rot_x * px == vec{0, sqrt2 / 2, sqrt2 / 2, 1} &&
-                   rot_y * py == vec{sqrt2 / 2, 0, sqrt2 / 2, 1} &&
-                   rot_z * pz == vec{-sqrt2 / 2, sqrt2 / 2, 0, 1},
+    PRINT_TEST(rot_x * px == vector{0, sqrt2 / 2, sqrt2 / 2, 1} &&
+                   rot_y * py == vector{sqrt2 / 2, 0, sqrt2 / 2, 1} &&
+                   rot_z * pz == vector{-sqrt2 / 2, sqrt2 / 2, 0, 1},
                "mat rotation");
 
     matrix4x4 shxy = mat::shearing(1, 0, 0, 0, 0, 0);
     matrix4x4 shzx = mat::shearing(0, 0, 0, 0, 1, 0);
-    vec ps{2, 3, 4, 1};
-    PRINT_TEST(shxy * ps == vec{5, 3, 4, 1} && shzx * ps == vec{2, 3, 6, 1}, "mat shearing");
+    vector ps{2, 3, 4, 1};
+    PRINT_TEST(shxy * ps == vector{5, 3, 4, 1} && shzx * ps == vector{2, 3, 6, 1}, "mat shearing");
 
-    vec point{1, 0, 1, 1};
+    vector point{1, 0, 1, 1};
     matrix4x4 A = mat::rotation_x(M_PI / 2);
-    vec point_r = A * point;
+    vector point_r = A * point;
     matrix4x4 B = mat::scaling(5, 5, 5);
-    vec point_rs = B * point_r;
+    vector point_rs = B * point_r;
     matrix4x4 C = mat::translation(10, 5, 7);
-    vec point_rst = C * point_rs;
+    vector point_rst = C * point_rs;
 
     matrix4x4 T = C * B * A;
-    vec point_t = T * point;
-    vec expected_point = vec{15, 0, 7, 1};
+    vector point_t = T * point;
+    vector expected_point = vector{15, 0, 7, 1};
     PRINT_TEST(point_rst == expected_point && point_t == expected_point, "mat chained transforms");
 }
 
 void test_rays() {
-    ray r{vect::point3(2, 3, 4),
-          vect::vector3(1, 0, 0)};
-    vec p2 = r.position(2.5);
-    PRINT_TEST(p2 == vect::point3(4.5, 3, 4), "ray position");
+    ray::ray r{vec::point3(2, 3, 4),
+               vec::vector3(1, 0, 0)};
+    vector p2 = r.find_position(2.5);
+    PRINT_TEST(p2 == vec::point3(4.5, 3, 4), "ray position");
 
     object s{};
-    ray r2{vect::point3(0, 0, -5), vect::vector3(0, 0, 1)};
-    std::vector<intersection> inters = intersect_sphere(s, r2);
+    ray::ray r2{vec::point3(0, 0, -5), vec::vector3(0, 0, 1)};
+    std::vector<ray::intersection> inters = intersect_sphere(s, r2);
     PRINT_TEST(inters.size() == 2 && eq(inters[0].t, 4.0) && eq(inters[1].t, 6.0), "ray sphere intersection 1");
 
-    ray r3{vect::point3(0, 1, -5), vect::vector3(0, 0, 1)};
-    std::vector<intersection> inters2 = intersect_sphere(s, r3);
+    ray::ray r3{vec::point3(0, 1, -5), vec::vector3(0, 0, 1)};
+    std::vector<ray::intersection> inters2 = intersect_sphere(s, r3);
     PRINT_TEST(inters2.size() == 2 && eq(inters2[0].t, 5.0) && eq(inters2[1].t, 5.0), "ray sphere intersection 2");
 
-    ray r4{vect::point3(0, 2, -5), vect::vector3(0, 0, 1)};
-    std::vector<intersection> inters3 = intersect_sphere(s, r4);
+    ray::ray r4{vec::point3(0, 2, -5), vec::vector3(0, 0, 1)};
+    std::vector<ray::intersection> inters3 = intersect_sphere(s, r4);
     PRINT_TEST(inters3.size() == 0, "ray sphere intersection 3");
 
-    ray r5{vect::point3(0, 0, 0), vect::vector3(0, 0, 1)};
-    std::vector<intersection> inters4 = intersect_sphere(s, r5);
+    ray::ray r5{vec::point3(0, 0, 0), vec::vector3(0, 0, 1)};
+    std::vector<ray::intersection> inters4 = intersect_sphere(s, r5);
     PRINT_TEST(inters4.size() == 2 && eq(inters4[0].t, -1) && eq(inters4[1].t, 1), "ray sphere intersection 4");
 
-    ray r6{vect::point3(0, 0, 5), vect::vector3(0, 0, 1)};
-    std::vector<intersection> inters5 = intersect_sphere(s, r6);
+    ray::ray r6{vec::point3(0, 0, 5), vec::vector3(0, 0, 1)};
+    std::vector<ray::intersection> inters5 = intersect_sphere(s, r6);
     PRINT_TEST(inters5.size() == 2 && eq(inters5[0].t, -6) && eq(inters5[1].t, -4), "ray sphere intersection 5");
 }
 
 void test_hits() {
     object s{};
-    std::vector<intersection> inters{intersection{-1, s}, intersection{1, s}};
+    std::vector<ray::intersection> inters{ray::intersection{-1, s}, ray::intersection{1, s}};
     PRINT_TEST(hit(inters).t == 1, "hit 1");
 
-    inters = {intersection{5, s}, intersection{7, s}, intersection{-3, s}, intersection{2, s}};
+    inters = {ray::intersection{5, s}, ray::intersection{7, s}, ray::intersection{-3, s}, ray::intersection{2, s}};
     PRINT_TEST(hit(inters).t == 2, "hit 2");
 
-    ray r{vect::point3(1, 2, 3), vect::vector3(0, 1, 0)};
-    ray r_trans = r.transform(mat::translation(3, 4, 5));
-    PRINT_TEST(r_trans.origin == vect::point3(4, 6, 8) && r_trans.direction == vect::vector3(0, 1, 0), "ray transform 1");
+    ray::ray r{vec::point3(1, 2, 3), vec::vector3(0, 1, 0)};
+    ray::ray r_trans = r.transform(mat::translation(3, 4, 5));
+    PRINT_TEST(r_trans.origin == vec::point3(4, 6, 8) && r_trans.direction == vec::vector3(0, 1, 0), "ray::ray transform 1");
 
     r_trans = r.transform(mat::scaling(2, 3, 4));
-    PRINT_TEST(r_trans.origin == vect::point3(2, 6, 12) && r_trans.direction == vect::vector3(0, 3, 0), "ray transform 2");
+    PRINT_TEST(r_trans.origin == vec::point3(2, 6, 12) && r_trans.direction == vec::vector3(0, 3, 0), "ray transform 2");
 
     object s1{};
-    ray r1{vect::point3(0, 0, -5), vect::vector3(0, 0, 1)};
+    ray::ray r1{vec::point3(0, 0, -5), vec::vector3(0, 0, 1)};
     s1.transform = mat::scaling(2, 2, 2);
     inters = intersect_sphere(s1, r1);
     PRINT_TEST(inters.size() == 2 && inters[0].t == 3 && inters[1].t == 7, "scaled sphere intersect");
@@ -214,107 +216,107 @@ void test_hits() {
 
 void test_normals() {
     object s{};
-    vec n = normal_at(s, vect::point3(1, 0, 0));
-    PRINT_TEST(n == vect::vector3(1, 0, 0), "normal 1");
+    vector n = ray::normal_at(s, vec::point3(1, 0, 0));
+    PRINT_TEST(n == vec::vector3(1, 0, 0), "normal 1");
 
-    n = normal_at(s, vect::point3(sqrt(3) / 3, sqrt(3) / 3, sqrt(3) / 3));
-    PRINT_TEST(n == vect::vector3(sqrt(3) / 3, sqrt(3) / 3, sqrt(3) / 3), "normal 2");
+    n = ray::normal_at(s, vec::point3(sqrt(3) / 3, sqrt(3) / 3, sqrt(3) / 3));
+    PRINT_TEST(n == vec::vector3(sqrt(3) / 3, sqrt(3) / 3, sqrt(3) / 3), "normal 2");
 
     s.transform = mat::translation(0, 1, 0);
-    n = normal_at(s, vect::point3(0, 1.70711, -0.70711));
-    PRINT_TEST(n == vect::vector3(0, 0.70711, -0.70711), "translated normal");
+    n = ray::normal_at(s, vec::point3(0, 1.70711, -0.70711));
+    PRINT_TEST(n == vec::vector3(0, 0.70711, -0.70711), "translated normal");
 
     matrix4x4 A = mat::scaling(1, 0.5, 1);
     matrix4x4 B = mat::rotation_z(M_PI / 5);
     s.transform = A * B;
-    n = normal_at(s, vect::point3(0, sqrt(2) / 2, -sqrt(2) / 2));
-    PRINT_TEST(n == vect::vector3(0, 0.97014, -0.24254), "translated normal 2");
+    n = ray::normal_at(s, vec::point3(0, sqrt(2) / 2, -sqrt(2) / 2));
+    PRINT_TEST(n == vec::vector3(0, 0.97014, -0.24254), "translated normal 2");
 
-    vec v = vect::vector3(1, -1, 0);
-    n = vect::vector3(0, 1, 0);
-    vec r = vect::reflect(v, n);
-    PRINT_TEST(r == vect::vector3(1, 1, 0), "reflect");
+    vector v = vec::vector3(1, -1, 0);
+    n = vec::vector3(0, 1, 0);
+    vector r = vec::reflect(v, n);
+    PRINT_TEST(r == vec::vector3(1, 1, 0), "reflect");
 
-    v = vect::vector3(0, -1, 0);
-    n = vect::vector3(sqrt(2) / 2, sqrt(2) / 2, 0);
-    r = vect::reflect(v, n);
-    PRINT_TEST(r == vect::vector3(1, 0, 0), "reflect 2");
+    v = vec::vector3(0, -1, 0);
+    n = vec::vector3(sqrt(2) / 2, sqrt(2) / 2, 0);
+    r = vec::reflect(v, n);
+    PRINT_TEST(r == vec::vector3(1, 0, 0), "reflect 2");
 }
 
 void test_lighting() {
     material m{};
-    vec position = vect::origin;
+    vector position = vec::origin;
 
-    vec eye = vect::vector3(0, 0, -1);
-    vec normal = vect::vector3(0, 0, -1);
-    point_light light{vect::point3(0, 0, -10), WHITE};
+    vector eye = vec::vector3(0, 0, -1);
+    vector normal = vec::vector3(0, 0, -1);
+    point_light light{vec::point3(0, 0, -10), WHITE};
     PRINT_TEST(phong_lighting(m, position, light, eye, normal) == color{1.9, 1.9, 1.9}, "lighting");
 
-    eye = vect::vector3(0, sqrt(2) / 2, -sqrt(2) / 2);
+    eye = vec::vector3(0, sqrt(2) / 2, -sqrt(2) / 2);
     PRINT_TEST(phong_lighting(m, position, light, eye, normal) == WHITE, "lighting 2");
 
-    eye = vect::vector3(0, 0, -1);
-    light = {vect::point3(0, 10, -10), WHITE};
+    eye = vec::vector3(0, 0, -1);
+    light = {vec::point3(0, 10, -10), WHITE};
     PRINT_TEST(phong_lighting(m, position, light, eye, normal) == color(0.7364, 0.7364, 0.7364), "lighting 3");
 
-    eye = vect::vector3(0, -sqrt(2) / 2, -sqrt(2) / 2);
-    normal = vect::vector3(0, 0, -1);
+    eye = vec::vector3(0, -sqrt(2) / 2, -sqrt(2) / 2);
+    normal = vec::vector3(0, 0, -1);
     PRINT_TEST(phong_lighting(m, position, light, eye, normal) == color(1.6364, 1.6364, 1.6364), "lighting 4");
 
-    eye = vect::vector3(0, 0, -1);
-    light = {vect::point3(0, 0, 10), WHITE};
+    eye = vec::vector3(0, 0, -1);
+    light = {vec::point3(0, 0, 10), WHITE};
     PRINT_TEST(phong_lighting(m, position, light, eye, normal) == color(0.1, 0.1, 0.1), "lighting 5");
 }
 
 void test_computations() {
-    ray r{vect::point3(0, 0, -5), vect::vector3(0, 0, 1)};
+    ray::ray r{vec::point3(0, 0, -5), vec::vector3(0, 0, 1)};
     object sphere{};
-    intersection i{4, sphere};
-    computation comp{i, r};
-    PRINT_TEST(comp.point == vect::point3(0, 0, -1) && comp.eye_vec == vect::vector3(0, 0, -1) && comp.normal_vec == vect::vector3(0, 0, -1) && comp.inside == false, "prepare computations");
+    ray::intersection i{4, sphere};
+    ray::computation comp{i, r};
+    PRINT_TEST(comp.point == vec::point3(0, 0, -1) && comp.eye_vec == vec::vector3(0, 0, -1) && comp.normal_vec == vec::vector3(0, 0, -1) && comp.inside == false, "prepare computations");
 }
 
 void test_world() {
     world w{};
-    std::vector<intersection> inters = w.intersect(ray{vect::point3(0, 0, -5), vect::vector3(0, 0, 1)});
+    std::vector<ray::intersection> inters = w.intersect(ray::ray{vec::point3(0, 0, -5), vec::vector3(0, 0, 1)});
     PRINT_TEST(inters.size() == 4 && inters[0].t == 4 && inters[1].t == 4.5 && inters[2].t == 5.5 && inters[3].t == 6, "world");
 
-    ray r{vect::point3(0, 0, -5), vect::vector3(0, 0, 1)};
+    ray::ray r{vec::point3(0, 0, -5), vec::vector3(0, 0, 1)};
     object obj = w.objects[0];
-    intersection i{4, obj};
-    computation comp{i, r};
+    ray::intersection i{4, obj};
+    ray::computation comp{i, r};
     PRINT_TEST(w.shade_hit(comp) == color(0.38066, 0.47583, 0.2855), "shade hit 1");
 
-    w.plights[0] = point_light{vect::point3(0, 0.25, 0), WHITE};
-    r.origin = vect::point3(0, 0, 0);
+    w.plights[0] = point_light{vec::point3(0, 0.25, 0), WHITE};
+    r.origin = vec::point3(0, 0, 0);
     obj = w.objects[1];
     i.t = 0.5;
     i.obj = obj;
-    computation comp2{i, r};
+    ray::computation comp2{i, r};
     PRINT_TEST(w.shade_hit(comp2) == color(0.90498, 0.90498, 0.90498), "shade hit 2");
 
     world w2{};
-    r = ray{vect::point3(0, 0, -5), vect::vector3(0, 1, 0)};
+    r = ray::ray{vec::point3(0, 0, -5), vec::vector3(0, 1, 0)};
     PRINT_TEST(w2.color_at(r) == BLACK, "color at 1");
 
-    r = ray{vect::point3(0, 0, -5), vect::vector3(0, 0, 1)};
+    r = ray::ray{vec::point3(0, 0, -5), vec::vector3(0, 0, 1)};
     PRINT_TEST(w2.color_at(r) == color{0.38066, 0.47583, 0.2855}, "color at 2");
 
     w2.objects[0].mat.ambient = 1;
     w2.objects[1].mat.ambient = 1;
-    r = ray{vect::point3(0, 0, 0.75), vect::vector3(0, 0, -1)};
+    r = ray::ray{vec::point3(0, 0, 0.75), vec::vector3(0, 0, -1)};
     PRINT_TEST(w2.color_at(r) == w2.objects[1].mat.surface, "color at 3");
 
-    matrix4x4 view = mat::view_transform(vect::point3(0, 0, 0), vect::point3(0, 0, -1), vect::vector3(0, 1, 0));
+    matrix4x4 view = mat::view_transform(vec::point3(0, 0, 0), vec::point3(0, 0, -1), vec::vector3(0, 1, 0));
     PRINT_TEST(view == mat::identity, "view transform 1");
 
-    view = mat::view_transform(vect::point3(0, 0, 0), vect::point3(0, 0, 1), vect::vector3(0, 1, 0));
+    view = mat::view_transform(vec::point3(0, 0, 0), vec::point3(0, 0, 1), vec::vector3(0, 1, 0));
     PRINT_TEST(view == mat::scaling(-1, 1, -1), "view transform 2");
 
-    view = mat::view_transform(vect::point3(0, 0, 8), vect::point3(0, 0, 0), vect::vector3(0, 1, 0));
+    view = mat::view_transform(vec::point3(0, 0, 8), vec::point3(0, 0, 0), vec::vector3(0, 1, 0));
     PRINT_TEST(view == mat::translation(0, 0, -8), "view transform 3");
 
-    view = mat::view_transform(vect::point3(1, 3, 2), vect::point3(4, -2, 8), vect::vector3(1, 1, 0));
+    view = mat::view_transform(vec::point3(1, 3, 2), vec::point3(4, -2, 8), vec::vector3(1, 1, 0));
     PRINT_TEST(view == matrix4x4{{-0.50709, 0.50709, 0.67612, -2.36643, 0.76772, 0.60609, 0.12122, -2.82843, -0.35857, 0.59761, -0.71714, 0.00000, 0.00000, 0.00000, 0.00000, 1.00000}}, "view transform 4");
 }
 
@@ -326,20 +328,20 @@ void test_camera() {
     PRINT_TEST(eq(c.pixel_size, 0.01), "camera 2");
 
     c = camera(201, 101, M_PI / 2);
-    ray r = c.ray_for_pixel(100, 50);
-    PRINT_TEST(r.origin == vect::point3(0, 0, 0) && r.direction == vect::vector3(0, 0, -1), "camera ray for pixel 1");
+    ray::ray r = c.ray_for_pixel(100, 50);
+    PRINT_TEST(r.origin == vec::point3(0, 0, 0) && r.direction == vec::vector3(0, 0, -1), "camera ray for pixel 1");
 
     r = c.ray_for_pixel(0, 0);
-    PRINT_TEST(r.origin == vect::point3(0, 0, 0) && r.direction == vect::vector3(0.66519, 0.33259, -0.66851), "camera ray for pixel 2");
+    PRINT_TEST(r.origin == vec::point3(0, 0, 0) && r.direction == vec::vector3(0.66519, 0.33259, -0.66851), "camera ray for pixel 2");
 
     matrix4x4 A = mat::rotation_y(M_PI / 4);
     matrix4x4 B = mat::translation(0, -2, 5);
     c.transform = A * B;
     r = c.ray_for_pixel(100, 50);
-    PRINT_TEST(r.origin == vect::point3(0, 2, -5) && r.direction == vect::vector3(sqrt(2) / 2, 0, -sqrt(2) / 2), "camera ray for pixel 3");
+    PRINT_TEST(r.origin == vec::point3(0, 2, -5) && r.direction == vec::vector3(sqrt(2) / 2, 0, -sqrt(2) / 2), "camera ray for pixel 3");
 
     world w{};
-    c = camera(11, 11, M_PI / 2, mat::view_transform(vect::point3(0, 0, -5), vect::point3(0, 0, 0), vect::vector3(0, 1, 0)));
+    c = camera(11, 11, M_PI / 2, mat::view_transform(vec::point3(0, 0, -5), vec::point3(0, 0, 0), vec::vector3(0, 1, 0)));
     canvas image = c.render(w);
     PRINT_TEST(image.get(5, 5) == color(0.38066, 0.47583, 0.2855), "camera render");
 }

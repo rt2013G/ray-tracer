@@ -86,7 +86,7 @@ struct matrix4x4 {
     float val[16];
     bool operator==(const matrix4x4 &mat);
     matrix4x4 operator*(matrix4x4 &mat);
-    vec operator*(vec &v);
+    vector operator*(vector &v);
     matrix4x4 transpose();
     matrix3x3 submatrix(int row, int col);
     float minor(int i, int j);
@@ -105,8 +105,8 @@ bool matrix4x4::operator==(const matrix4x4 &mat) {
     return true;
 }
 
-vec matrix4x4::operator*(vec &v) {
-    vec out{0, 0, 0, 0};
+vector matrix4x4::operator*(vector &v) {
+    vector out{0, 0, 0, 0};
     out.x += this->val[0] * v.x;
     out.x += this->val[1] * v.y;
     out.x += this->val[2] * v.z;
@@ -241,12 +241,12 @@ matrix4x4 shearing(float xy, float xz, float yx, float yz, float zx, float zy) {
     return matrix4x4({1, xy, xz, 0, yx, 1, yz, 0, zx, zy, 1, 0, 0, 0, 0, 1});
 }
 
-matrix4x4 view_transform(vec from, vec to, vec up) {
-    vec forward = to - from;
+matrix4x4 view_transform(vector from, vector to, vector up) {
+    vector forward = to - from;
     forward.normalize();
     up.normalize();
-    vec left = forward.cross(up);
-    vec true_up = left.cross(forward);
+    vector left = vec::cross(forward, up);
+    vector true_up = vec::cross(left, forward);
     matrix4x4 orientation{{left.x, left.y, left.z, 0, true_up.x, true_up.y, true_up.z, 0, -forward.x, -forward.y, -forward.z, 0, 0, 0, 0, 1}};
     matrix4x4 transl = mat::translation(-from.x, -from.y, -from.z);
     return orientation * transl;

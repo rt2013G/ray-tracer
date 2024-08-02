@@ -36,9 +36,29 @@ material::material() {
     this->reflective = 0.0;
 }
 
+struct triangle_data {
+    vector p1;
+    vector p2;
+    vector p3;
+    vector e1;
+    vector e2;
+    vector normal;
+    triangle_data(vector p1, vector p2, vector p3);
+};
+
+triangle_data::triangle_data(vector p1, vector p2, vector p3) {
+    this->p1 = p1;
+    this->p2 = p2;
+    this->p3 = p3;
+    this->e1 = p2 - p1;
+    this->e2 = p3 - p1;
+    this->normal = vec::cross(e2, e1).normalize();
+}
+
 enum obj_type {
     SPHERE = 0,
-    PLANE = 1
+    PLANE = 1,
+    TRIANGLE = 2
 };
 
 struct object {
@@ -50,6 +70,7 @@ struct object {
     object(obj_type type);
     object(matrix4x4 transform);
     object(matrix4x4 transform, material mat);
+    triangle_data tdata = triangle_data{vec::origin, vec::origin, vec::origin};
 };
 
 static uint CURRENT_ID = 0;
@@ -82,6 +103,12 @@ object::object(matrix4x4 transform, material mat) {
     this->mat = mat;
 }
 
+object triangle(vector p1, vector p2, vector p3) {
+    object triangle{TRIANGLE};
+    triangle.tdata = triangle_data(p1, p2, p3);
+    return triangle;
+}
+
 vector normal_at(object obj, vector p) {
     matrix4x4 invers_trans = obj.transform.inverse();
     vector obj_p = invers_trans * p;
@@ -92,6 +119,9 @@ vector normal_at(object obj, vector p) {
     } break;
     case PLANE: {
         obj_normal = vec::vector3(0, 1, 0);
+    } break;
+    case TRIANGLE: {
+        obj_normal = obj.tdata.normal;
     } break;
     default: {
         std::cout << "ERROR. unidentified object type" << std::endl;
@@ -149,6 +179,30 @@ std::vector<intersection> intersect_plane(object plane, ray r) {
 
     float t = -r.origin.y / r.direction.y;
     return std::vector<intersection>{intersection{t, plane}};
+}
+
+std::vector<intersection> intersect_triangle(object t, ray r) {
+    vector dir_cross_e2 = vec::cross(r.direction, t.tdata.e2);
+    float det = vec::dot(t.tdata.e1, dir_cross_e2);
+    if (abs(det) < EPSILON) {
+        return std::vector<intersection>{};
+    }
+
+    float f = 1.0 / det;
+    vector p1_to_origin = r.origin - t.tdata.p1;
+    float u = f * vec::dot(p1_to_origin, dir_cross_e2);
+    if (u < 0 || u > 1) {
+        return std::vector<intersection>{};
+    }
+
+    vector origin_cross_e1 = vec::cross(p1_to_origin, t.tdata.e1);
+    float v = f * vec::dot(r.direction, origin_cross_e1);
+    if (v < 0 || (u + v) > 1) {
+        return std::vector<intersection>{};
+    }
+
+    float td = f * vec::dot(t.tdata.e2, origin_cross_e1);
+    return std::vector<intersection>{intersection{td, t}};
 }
 
 std::vector<intersection> intersect_object(object obj, ray r) {

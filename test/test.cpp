@@ -431,6 +431,29 @@ void test_reflection() {
     PRINT_TEST(w.reflected_color(comps, 0) == BLACK, "plane reflection 3");
 }
 
+void test_triangles() {
+    object t = triangle(vec::point3(0, 1, 0), vec::point3(-1, 0, 0), vec::point3(1, 0, 0));
+    ray::ray r{vec::point3(0, -1, -2), vec::vector3(0, 1, 0)};
+    std::vector<ray::intersection> inters = ray::intersect_triangle(t, r);
+    PRINT_TEST(inters.size() == 0, "triangle intersection 1");
+
+    r = ray::ray{vec::point3(1, 1, -2), vec::vector3(0, 0, 1)};
+    inters = ray::intersect_triangle(t, r);
+    PRINT_TEST(inters.size() == 0, "triangle intersection 2");
+
+    r = ray::ray{vec::point3(-1, 1, -2), vec::vector3(0, 0, 1)};
+    inters = ray::intersect_triangle(t, r);
+    PRINT_TEST(inters.size() == 0, "triangle intersection 3");
+
+    r = ray::ray{vec::point3(0, -1, -2), vec::vector3(0, 0, 1)};
+    inters = ray::intersect_triangle(t, r);
+    PRINT_TEST(inters.size() == 0, "triangle intersection 4");
+
+    r = ray::ray{vec::point3(0, 0.5, -2), vec::vector3(0, 0, 1)};
+    inters = ray::intersect_triangle(t, r);
+    PRINT_TEST(inters.size() == 1 && inters[0].t == 2, "triangle intersection 5");
+}
+
 int main(void) {
     std::cout << std::endl
               << "testing vectors..." << std::endl;
@@ -474,6 +497,9 @@ int main(void) {
     std::cout << std::endl
               << "testing reflection..." << std::endl;
     test_reflection();
+    std::cout << std::endl
+              << "testing triangles..." << std::endl;
+    test_triangles();
 
     return 0;
 }

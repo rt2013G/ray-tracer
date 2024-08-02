@@ -13,8 +13,9 @@ struct world {
     world(std::vector<point_light> plights, std::vector<object> objects);
     std::vector<ray::intersection> intersect(ray::ray r);
     bool is_shadowed(point_light light, vector point);
-    color shade_hit(ray::computation comp);
-    color color_at(ray::ray r);
+    color shade_hit(ray::computation comp, int remaining);
+    color color_at(ray::ray r, int remaining);
+    color reflected_color(ray::computation comps, int remaining);
 };
 
 world::world() {
@@ -67,24 +68,37 @@ bool world::is_shadowed(point_light light, vector point) {
     return false;
 }
 
-color world::shade_hit(ray::computation comp) {
+color world::shade_hit(ray::computation comp, int remaining = 5) {
     color c = BLACK;
     for (point_light &pl : this->plights) {
         c = c + phong_lighting(comp.obj.mat, comp.over_point, pl,
                                comp.eye_vec, comp.normal_vec,
                                this->is_shadowed(pl, comp.over_point));
     }
-    return c;
+    color reflect = this->reflected_color(comp, remaining);
+    return c + reflect;
 }
 
-color world::color_at(ray::ray r) {
+color world::color_at(ray::ray r, int remaining = 5) {
     std::vector<ray::intersection> inters = this->intersect(r);
     ray::intersection i = hit(inters);
     if (i.t < 0) {
         return BLACK;
     }
     ray::computation comp{i, r};
-    return this->shade_hit(comp);
+    return this->shade_hit(comp, remaining);
+}
+
+color world::reflected_color(ray::computation comps, int remaining = 5) {
+    if (remaining <= 0) {
+        return BLACK;
+    }
+    if (eq(comps.obj.mat.reflective, 0)) {
+        return BLACK;
+    }
+    ray::ray reflect_ray = ray::ray{comps.over_point, comps.reflect_vec};
+    color c = this->color_at(reflect_ray, remaining - 1);
+    return c * comps.obj.mat.reflective;
 }
 
 struct camera {

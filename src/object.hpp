@@ -12,16 +12,19 @@ struct material {
     float diffuse;
     float specular;
     float shininess;
-    material(color surface, float ambient, float diffuse, float specular, float shininess);
+    float reflective;
+    float transparency;
+    material(color surface, float ambient, float diffuse, float specular, float shininess, float reflective);
     material();
 };
 
-material::material(color surface, float ambient, float diffuse, float specular, float shininess) {
+material::material(color surface, float ambient, float diffuse, float specular, float shininess, float reflective) {
     this->surface = surface;
     this->ambient = ambient;
     this->diffuse = diffuse;
     this->specular = specular;
     this->shininess = shininess;
+    this->reflective = reflective;
 }
 
 material::material() {
@@ -30,6 +33,7 @@ material::material() {
     this->diffuse = 0.9;
     this->specular = 0.9;
     this->shininess = 128;
+    this->reflective = 0.0;
 }
 
 enum obj_type {
@@ -188,6 +192,7 @@ struct computation {
     vector over_point;
     vector eye_vec;
     vector normal_vec;
+    vector reflect_vec;
     bool inside;
     computation(intersection i, ray r);
 };
@@ -205,6 +210,7 @@ computation::computation(intersection i, ray r) {
         this->inside = false;
     }
     this->over_point = this->point + this->normal_vec * SHADOW_OFFSET;
+    this->reflect_vec = vec::reflect(r.direction, this->normal_vec);
 }
 } // namespace ray
 

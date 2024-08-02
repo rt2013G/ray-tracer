@@ -406,6 +406,31 @@ void test_planes() {
     PRINT_TEST(inters.size() == 1 && inters[0].t == 1, "plane intersect 4");
 }
 
+void test_reflection() {
+    object plane(PLANE);
+    ray::ray r{vec::point3(0, 1, -1), vec::vector3(0, -sqrt(2) / 2, sqrt(2) / 2)};
+    ray::intersection i{sqrt(2), plane};
+    ray::computation comps{i, r};
+    PRINT_TEST(comps.reflect_vec == vec::vector3(0, sqrt(2) / 2, sqrt(2) / 2), "reflect vec");
+
+    world w{};
+    r = ray::ray{vec::point3(0, 0, 0), vec::vector3(0, 0, 1)};
+    w.objects[1].mat.ambient = 1;
+    i = ray::intersection{1, w.objects[1]};
+    comps = ray::computation{i, r};
+    PRINT_TEST(w.reflected_color(comps) == BLACK, "reflection computation");
+
+    plane.mat.reflective = 0.5;
+    plane.transform = mat::translation(0, -1, 0);
+    w.objects.push_back(plane);
+    r = ray::ray{vec::point3(0, 0, -3), vec::vector3(0, -sqrt(2) / 2, sqrt(2) / 2)};
+    i = ray::intersection{sqrt(2.0f), plane};
+    comps = ray::computation{i, r};
+    PRINT_TEST(w.reflected_color(comps) == color(0.19032, 0.2379, 0.14274), "plane reflection");
+    PRINT_TEST(w.shade_hit(comps) == color(0.87677, 0.92436, 0.82918), "plane reflection 2");
+    PRINT_TEST(w.reflected_color(comps, 0) == BLACK, "plane reflection 3");
+}
+
 int main(void) {
     std::cout << std::endl
               << "testing vectors..." << std::endl;
@@ -446,6 +471,9 @@ int main(void) {
     std::cout << std::endl
               << "testing planes..." << std::endl;
     test_planes();
+    std::cout << std::endl
+              << "testing reflection..." << std::endl;
+    test_reflection();
 
     return 0;
 }

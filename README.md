@@ -19,3 +19,7 @@ This is a Ray Tracer built while following the book "The Ray Tracer Challenge: A
 
 ##### Balls, from above
 <img src="https://imgur.com/VWdIbk4.png" width=256 height=256>
+
+### Chapter 11
+##### A snowman, with reflections
+<img src="https://imgur.com/WFgFWnl.png" width=256 height=256>
